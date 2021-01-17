@@ -12,6 +12,23 @@
     .section .iwram, "ax", %progbits
     .align 2
     .arm
+    .global __aeabi_memcpy
+    .type __aeabi_memcpy STT_FUNC
+__aeabi_memcpy:
+    and     r3, r0, #3
+    and     r12, r1, #3
+    cmp     r3, r12
+    bne     .Lunaligned
+
+    rsb     r12, r12, #4
+    sub     r2, r2, r12
+.Lcopy_front:
+    subs    r12, r12, #1
+    ldrhsb  r3, [r1], #1
+    strhsb  r3, [r0], #1
+    bhs     .Lcopy_front
+    @ Fallthrough __aeabi_memcpy8/__aeabi_memcpy4
+
     .global __aeabi_memcpy8
     .type __aeabi_memcpy8 STT_FUNC
 __aeabi_memcpy8:
@@ -48,22 +65,6 @@ __aeabi_memcpy4:
     bhs     .Lcopy
     bx      lr
 
-    .global __aeabi_memcpy
-    .type __aeabi_memcpy STT_FUNC
-__aeabi_memcpy:
-    and     r3, r0, #3
-    and     r12, r1, #3
-    cmp     r3, r12
-    bne     .Lunaligned
-
-    rsb     r12, r12, #4
-    sub     r2, r2, r12
-.Lcopy_front:
-    subs    r12, r12, #1
-    ldrhsb  r3, [r1], #1
-    strhsb  r3, [r0], #1
-    bhs     .Lcopy_front
-    b       __aeabi_memcpy4
 .Lunaligned:
     subs    r2, r2, #1
     ldrhsb  r3, [r1], #1
