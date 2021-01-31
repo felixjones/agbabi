@@ -14,6 +14,7 @@ add_library(agbabi STATIC
     source/setcontext.s
     source/swapcontext.s
     source/uidiv.s
+    source/vmem.s
 )
 target_include_directories(agbabi SYSTEM PUBLIC "include/")
 

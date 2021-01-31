@@ -5,7 +5,7 @@
 @   __aeabi_memcpy8, __aeabi_memcpy4 and __aeabi_memcpy
 @   (void *dest, const void *src, size_t n)
 @ memcpy8 is an alias of memcpy4
-@ memcpy4 dest * src are word-aligned
+@ memcpy4 dest & src are word-aligned
 @ memcpy might not be word-aligned
 @--------------------------------------------------------------------------------
 
@@ -18,7 +18,8 @@ __aeabi_memcpy:
     and     r3, r0, #3
     and     r12, r1, #3
     cmp     r3, r12
-    bne     .Lunaligned
+    movne   r12, r2
+    bne     .Lcopy
 
     rsb     r12, r12, #4
     sub     r2, r2, r12
@@ -63,11 +64,4 @@ __aeabi_memcpy4:
     ldrhsb  r3, [r1], #1
     strhsb  r3, [r0], #1
     bhs     .Lcopy
-    bx      lr
-
-.Lunaligned:
-    subs    r2, r2, #1
-    ldrhsb  r3, [r1], #1
-    strhsb  r3, [r0], #1
-    bhs     .Lunaligned
     bx      lr

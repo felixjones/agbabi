@@ -36,7 +36,7 @@ typedef struct ucontext_t {
 } ucontext_t;
 
 #if defined( __cplusplus )
-}
+} // extern "C"
 #endif
 
 #endif // define _AGBABI_SYS_UCONTEXT_H_
