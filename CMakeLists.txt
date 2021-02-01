@@ -12,6 +12,7 @@ add_library(agbabi STATIC
     source/memset.s
     source/rmemcpy.s
     source/setcontext.s
+    source/sine.s
     source/swapcontext.s
     source/uidiv.s
     source/vmem.s
