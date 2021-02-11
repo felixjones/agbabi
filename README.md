@@ -153,3 +153,8 @@ Certain GBA BIOS functions and hardware features depend on IRQs being raised and
 The handler `__agbabi_irq_user` acknowledges raised IRQs, but will also jump to the function pointer at symbol `__agbabi_irq_uproc` with a branch-exchange, allowing more complex IRQ handling to be implemented.
 
 Nested IRQ handling can be enabled by writing `1` to the lowest bit of `REG_IME` from the `__agbabi_irq_uproc` user procedure.
+
+```c
+void (*__agbabi_irq_uproc)(short flags);
+```
+The argument `flags` of the `__agbabi_irq_uproc` procedure will contain a mask of the raised IRQs.
