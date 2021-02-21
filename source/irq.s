@@ -21,9 +21,11 @@ __agbabi_irq_uproc:
     .section .iwram,"ax",%progbits
     .align 2
     .arm
+    .func   __agbabi_irq_empty
     .global __agbabi_irq_empty
     .type __agbabi_irq_empty STT_FUNC
 __agbabi_irq_empty:
+    .fnstart
     mov     r0, #REG_BASE
 
     @ r1 = REG_IE & REG_IF, r0 = &REG_IE_IF
@@ -39,13 +41,17 @@ __agbabi_irq_empty:
     str     r2, [r0, #(REG_BIOSIF - REG_IE_IF)]
 
     bx lr
+    .fnend
+    .endfunc
 
     .section .iwram,"ax",%progbits
     .align 2
     .arm
+    .func   __agbabi_irq_user
     .global __agbabi_irq_user
     .type __agbabi_irq_user STT_FUNC
 __agbabi_irq_user:
+    .fnstart
     mov     r1, #REG_BASE
 
     @ r1 = REG_IE & REG_IF, r0 = &REG_IE_IF
@@ -108,3 +114,5 @@ __agbabi_irq_user:
     str     r2, [r1, #(REG_IME - REG_IE_IF)]
 
     bx lr
+    .fnend
+    .endfunc
