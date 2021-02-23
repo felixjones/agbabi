@@ -3,13 +3,14 @@
 
 #define REGISTER_ARGS   ( 4 )
 
-void __agbabi_makecontext( struct ucontext_t *, void ( * )( void ), int, ... ) __attribute__((section(".ewram"))) __attribute__((target("thumb")));
+void __agbabi_makecontext( struct ucontext_t *, void ( * )( void ), int, ... ) __attribute__((section(".text"))) __attribute__((target("thumb")));
+
 static void __aeabi_popcontext() __attribute__((section(".iwram"))) __attribute__((target("arm")));
 
-static void __aeabi_popcontext() {
+static __attribute__((naked)) void __aeabi_popcontext() {
     asm(
         "pop\t{r0}\r\n"
-        "tst\tr0, #0\r\n"
+        "cmp\tr0, #0\r\n"
         ".extern\t__agbabi_setcontext\r\n"
         "bne\t__agbabi_setcontext\r\n"
         ".extern\t_exit\r\n"

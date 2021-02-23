@@ -29,7 +29,6 @@
     .section .iwram, "ax", %progbits
     .align 2
     .arm
-
     .func   __agbabi_getcontext
     .global __agbabi_getcontext
     .type   __agbabi_getcontext STT_FUNC
@@ -62,6 +61,9 @@ __agbabi_getcontext:
     .fnend
     .endfunc
 
+    .section .iwram, "ax", %progbits
+    .align 2
+    .arm
     .func   __agbabi_setcontext
     .global __agbabi_setcontext
     .type   __agbabi_setcontext STT_FUNC
@@ -96,6 +98,9 @@ __agbabi_setcontext:
     .fnend
     .endfunc
 
+    .section .iwram, "ax", %progbits
+    .align 2
+    .arm
     .func   __agbabi_swapcontext
     .global __agbabi_swapcontext
     .type   __agbabi_swapcontext STT_FUNC
