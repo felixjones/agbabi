@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(agbabi C ASM)
 
 add_library(agbabi STATIC
-    source/getcontext.s
+    source/context.s
     source/irq.s
     source/idiv.s
     source/makecontext.c
@@ -11,9 +11,7 @@ add_library(agbabi STATIC
     source/memcpy.s
     source/memset.s
     source/rmemcpy.s
-    source/setcontext.s
     source/sine.s
-    source/swapcontext.s
     source/uidiv.s
     source/vmem.s
 )
