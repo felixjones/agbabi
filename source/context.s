@@ -69,31 +69,35 @@ __agbabi_getcontext:
     .type   __agbabi_setcontext STT_FUNC
 __agbabi_setcontext:
     .fnstart
-    @ Disable IRQ
-    mrs     r1, cpsr
-    orr     r1, r1, #0x80
+    @ Enter target mode (IRQ disabled, ARM mode forced)
+    ldr     r2, [r0, #MCONTEXT_ARM_CPSR]
+    orr     r1, r2, #0x80
+    bic     r1, r1, #0x20
     msr     cpsr, r1
 
-    @ Restore r2-r12, sp, lr
-    add     r0, r0, #MCONTEXT_ARM_R2
-    ldmia   r0, {r2-r12, sp, lr}
+    @ Restore r3-r12
+    add     r0, r0, #MCONTEXT_ARM_R3
+    ldmia   r0, {r3-r12}
 
-    @ Enter IRQ mode (IRQ still disabled)
-    mov     r1, #0x92
+    @ Restore sp, lr
+    ldr     sp, [r0, #(MCONTEXT_ARM_SP - MCONTEXT_ARM_R3)]
+    ldr     lr, [r0, #(MCONTEXT_ARM_LR - MCONTEXT_ARM_R3)]
+
+    @ Enter f_IRQ mode (IRQ still disabled)
+    mov     r1, #0x91
     msr     cpsr, r1
 
-    @ Restore cpsr into irq spsr
-    ldr     r1, [r0, #(MCONTEXT_ARM_CPSR - MCONTEXT_ARM_R2)]
-    msr     spsr, r1
+    @ Restore cpsr into f_irq spsr
+    msr     spsr, r2
 
-    @ Restore pc into irq lr
-    ldr     lr, [r0, #(MCONTEXT_ARM_PC - MCONTEXT_ARM_R2)]
+    @ Restore pc into f_irq lr
+    ldr     lr, [r0, #(MCONTEXT_ARM_PC - MCONTEXT_ARM_R3)]
 
-    @ Restore r0-r1
-    sub     r0, r0, #(MCONTEXT_ARM_R2 - MCONTEXT_ARM_R0)
-    ldmia   r0, {r0-r1}
+    @ Restore r0-r2
+    sub     r0, r0, #(MCONTEXT_ARM_R3 - MCONTEXT_ARM_R0)
+    ldmia   r0, {r0-r2}
 
-    @ pc = irq lr, cpsr = irq spsr
+    @ pc = f_irq lr, cpsr = f_irq spsr
     movs    pc, lr
     .fnend
     .endfunc
