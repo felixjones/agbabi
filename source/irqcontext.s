@@ -43,41 +43,35 @@
     .type __agbabi_irq_ucontext STT_FUNC
 __agbabi_irq_ucontext:
     .fnstart
-
     @ Save cpsr
-    mrs     r2, cpsr
+    mrs     r0, cpsr
 
     @ Enter target mode (IRQ disabled, ARM mode forced)
-    mrs     r0, spsr
-    orr     r1, r0, #0x80
+    mrs     r2, spsr
+    orr     r1, r2, #0x80
     bic     r1, r1, #0x20
     msr     cpsr, r1
 
     @ Store target sp
     mov     r1, sp
 
-    msr     cpsr, r2
-
-    @ Preserve target sp and irq_spsr on IRQ stack
-    push    {r0, r1}
+    msr     cpsr, r0
 
     @ Point r0 to original stack
-    add     r0, sp, #(4 * 3)
+    mov     r0, sp
     sub     sp, sp, #UCONTEXT_SIZEOF
+
+    @ Store target sp
+    str     r1, [sp, #MCONTEXT_ARM_SP]
 
     @ Store cpsr
     str     r2, [sp, #MCONTEXT_ARM_CPSR]
 
-    @ Store pc
-    ldr     r1, =.Lpop_spsr_sp
+    @ Retrieve & store lr from stack (use as pc)
+    ldr     r1, [r0, #(4 * 5)]
+    @ -4 from lr because BIOS IRQ does that
+    sub     r1, r1, #4
     str     r1, [sp, #MCONTEXT_ARM_PC]
-
-    @ Store lr
-    str     lr, [sp, #MCONTEXT_ARM_LR]
-
-    @ Store sp (popped ucontext_t)
-    add     r1, sp, #UCONTEXT_SIZEOF
-    str     r1, [sp, #MCONTEXT_ARM_SP]
 
     @ Retrieve r0-r2 from stack
     ldmia   r0, {r0-r2}
@@ -135,7 +129,8 @@ __agbabi_irq_ucontext:
     orr     r3, r3, #0x92
     msr     cpsr, r3
 
-    add     sp, sp, #UCONTEXT_SIZEOF
+    @ BIOS IRQ stack pop
+    add     sp, sp, #(UCONTEXT_SIZEOF + 4 * 6)
 
     ldrh    r3, [r2]
     orr     r3, r3, r1
@@ -175,23 +170,3 @@ __agbabi_irq_ucontext:
     ldmia   r0, {r0-r3}
 
     movs    pc, lr
-.Lpop_spsr_sp:
-    pop     {r0, r1}
-    msr     spsr, r0
-
-    @ Save cpsr
-    mrs     r2, cpsr
-
-    @ Enter target mode (IRQ disabled)
-    orr     r0, r0, #0x80
-    bic     r0, r0, #0x20
-    msr     cpsr, r0
-
-    @ Restore stack
-    mov     sp, r1
-
-    @ Return to IRQ mode
-    msr     cpsr, r2
-
-    bx      lr
-    .fnend
