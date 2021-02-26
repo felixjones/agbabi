@@ -166,7 +166,7 @@ __agbabi_irq_ucontext:
     ldr     lr, [r0, #(MCONTEXT_ARM_PC - MCONTEXT_ARM_R4)]
 
     @ Restore r0-r3
-    sub     r0, r0, #(MCONTEXT_ARM_R3 - MCONTEXT_ARM_R0)
+    sub     r0, r0, #(MCONTEXT_ARM_R4 - MCONTEXT_ARM_R0)
     ldmia   r0, {r0-r3}
 
     movs    pc, lr
