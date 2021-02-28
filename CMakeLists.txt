@@ -8,6 +8,7 @@ add_library(agbabi STATIC
     source/idiv.s
     source/irqcontext.s
     source/makecontext.c
+    source/mat_mult.c
     source/memmove.c
     source/memcpy.s
     source/memset.s
