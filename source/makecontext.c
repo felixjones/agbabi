@@ -5,9 +5,9 @@
 
 void __agbabi_makecontext( struct ucontext_t *, void ( * )( void ), int, ... ) __attribute__((section(".text"))) __attribute__((target("thumb")));
 
-static void __aeabi_popcontext() __attribute__((section(".iwram"))) __attribute__((target("arm")));
+static void __agbabi_popcontext() __attribute__((section(".iwram"))) __attribute__((target("arm")));
 
-static __attribute__((naked)) void __aeabi_popcontext() {
+static __attribute__((naked)) void __agbabi_popcontext() {
     asm(
         "pop\t{r0}\r\n"
         "cmp\tr0, #0\r\n"
@@ -31,7 +31,7 @@ void __agbabi_makecontext( struct ucontext_t * ucp, void ( * func )( void ), int
     }
 
     ucp->uc_mcontext.arm_sp = ( long unsigned int ) funcstack;
-    ucp->uc_mcontext.arm_lr = ( long unsigned int ) __aeabi_popcontext;
+    ucp->uc_mcontext.arm_lr = ( long unsigned int ) __agbabi_popcontext;
     ucp->uc_mcontext.arm_pc = ( long unsigned int ) func;
     ucp->uc_mcontext.arm_cpsr = ( ucp->uc_mcontext.arm_pc & 1 ? 0x3f : 0x1f );
 
