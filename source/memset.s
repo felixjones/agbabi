@@ -75,18 +75,6 @@ __agbabi_wordset4:
     bhs     .Lset
     bx      lr
 
-    .global memset
-    .type memset STT_FUNC
-memset:
-    mov     r3, r2
-    mov     r2, r1
-    mov     r1, r3
-    push    {r0, lr}
-    .extern __aeabi_memset
-    bl      __aeabi_memset
-    pop     {r0, lr}
-    bx      lr
-
     .section .ewram, "ax", %progbits
     .align 2
     .thumb
@@ -106,3 +94,15 @@ __aeabi_memclr:
     movs    r2, #0
     ldr     r3, =__aeabi_memset
     bx      r3
+
+    .global memset
+    .type memset STT_FUNC
+memset:
+    movs    r3, r2
+    movs    r2, r1
+    movs    r1, r3
+    push    {r0, lr}
+    bl      __aeabi_memset
+    pop     {r0}
+    pop     {r1}
+    bx      r1

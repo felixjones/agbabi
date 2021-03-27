@@ -66,10 +66,14 @@ __aeabi_memcpy4:
     bhs     .Lcopy
     bx      lr
 
+    .section .ewram, "ax", %progbits
+    .align 2
+    .thumb
     .global memcpy
     .type memcpy STT_FUNC
 memcpy:
     push    {r0, lr}
     bl      __aeabi_memcpy
-    pop     {r0, lr}
-    bx      lr
+    pop     {r0}
+    pop     {r1}
+    bx      r1
