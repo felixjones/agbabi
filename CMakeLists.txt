@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(agbabi C ASM)
 
 add_library(agbabi STATIC
+    source/c_string_byte.s
     source/context.s
     source/irq.s
     source/idiv.s
