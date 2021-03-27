@@ -6,6 +6,22 @@ Includes implementations for various [aeabi functions](https://developer.arm.com
 
 Originally created as an optional utility library for [gba-toolchain](https://github.com/felixjones/gba-toolchain) projects.
 
+# C string byte functions
+
+## memcpy
+Calls `__aeabi_memcpy` and returns dest.
+```c
+void* memcpy(void *restrict dest, const void *restrict src, size_t count);
+```
+Compilers sometimes replace memory-copying loops with a call to `memcpy`.
+
+## memset
+Calls `__aeabi_memset` and returns dest.
+```c
+void *memset( void *dest, int ch, size_t count );
+```
+Compilers sometimes replace memory-clearing loops with a call to `memset`.
+
 # aeabi helper functions
 ## Integer (32/32 → 32) division functions
 The 32-bit integer division functions return the quotient in r0 or both quotient and remainder in {r0, r1}.    
@@ -158,3 +174,55 @@ Nested IRQ handling can be enabled by writing `1` to the lowest bit of `REG_IME`
 void (*__agbabi_irq_uproc)(short flags);
 ```
 The argument `flags` of the `__agbabi_irq_uproc` procedure will contain a mask of the raised IRQs.
+
+### Context irq
+Implements an IRQ handler that can modify the return context.
+
+To use this function its address must be written to `0x3007FFC`.
+```c
+void __agbabi_irq_ucontext();
+```
+Behaves identically to `__agbabi_irq_user`, however the `__agbabi_irq_uproc` procedure signature is changed.
+
+```c
+const ucontext_t *(*__agbabi_irq_uproc)(const ucontext_t *inContext, short flags);
+```
+The argument `inContext` of the `__agbabi_irq_uproc` procedure will contain a context describing the program state before the IRQ was raised. 
+
+The return value is the context to be set when the IRQ handler is complete.    
+`inContext` must be returned if no context switching is needed.
+
+## Matrix multiplication
+
+### 3x3 matrices
+Unsafe multiplication of two matrices.
+```c
+struct mat3 {
+    int m00; int m01; int m02;
+    int m10; int m11; int m12;
+    int m20; int m21; int m22;
+};
+
+void __agbabi_mat3_mult( const struct mat3 *restrict srcA, const struct mat3 *restrict srcB, struct mat3 *restrict dst);
+void __agbabi_mat3_mult_q( const struct mat3 *restrict srcA, const struct mat3 *restrict srcB, struct mat3 *restrict dst, int q);
+```
+`dst` is filled with the product of `srcA` * `srcB`. `dst` must not overlap with `srcA` or `srcB`.
+
+`__agbabi_mat3_mult_q` will logically shift right each component of the result by value `q`, ideal for fixed point matrices.
+
+### 4x4 matrices
+Unsafe multiplication of two matrices.
+```c
+struct mat4 {
+    int m00; int m01; int m02; int m03;
+    int m10; int m11; int m12; int m13;
+    int m20; int m21; int m22; int m23;
+    int m30; int m31; int m32; int m33;
+};
+
+void __agbabi_mat4_mult( const struct mat4 *restrict srcA, const struct mat4 *restrict srcB, struct mat4 *restrict dst);
+void __agbabi_mat4_mult_q( const struct mat4 *restrict srcA, const struct mat4 *restrict srcB, struct mat4 *restrict dst, int q);
+```
+`dst` is filled with the product of `srcA` * `srcB`. `dst` must not overlap with `srcA` or `srcB`.
+
+`__agbabi_mat4_mult_q` will logically shift right each component of the result by value `q`, ideal for fixed point matrices.
