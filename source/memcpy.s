@@ -65,3 +65,11 @@ __aeabi_memcpy4:
     strhsb  r3, [r0], #1
     bhs     .Lcopy
     bx      lr
+
+    .global memcpy
+    .type memcpy STT_FUNC
+memcpy:
+    push    {r0, lr}
+    bl      __aeabi_memcpy
+    pop     {r0, lr}
+    bx      lr

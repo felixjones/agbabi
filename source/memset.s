@@ -75,6 +75,18 @@ __agbabi_wordset4:
     bhs     .Lset
     bx      lr
 
+    .global memset
+    .type memset STT_FUNC
+memset:
+    mov     r3, r2
+    mov     r2, r1
+    mov     r1, r3
+    push    {r0, lr}
+    .extern __aeabi_memset
+    bl      __aeabi_memset
+    pop     {r0, lr}
+    bx      lr
+
     .section .ewram, "ax", %progbits
     .align 2
     .thumb
