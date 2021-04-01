@@ -18,7 +18,7 @@ Compilers sometimes replace memory-copying loops with a call to `memcpy`.
 ## memset
 Calls `__aeabi_memset` and returns dest.
 ```c
-void *memset( void *dest, int ch, size_t count );
+void* memset( void *dest, int ch, size_t count );
 ```
 Compilers sometimes replace memory-clearing loops with a call to `memset`.
 
@@ -107,16 +107,6 @@ void __agbabi_wordset4(void *dest, size_t n, int c);
 ```
 If the `size_t` argument is not a multiple of 4, the low bytes of `c` will be copied into the remaining space.
 
-### Sparse 16-bit memory setting
-Useful for sparsely copying GBA VRAM with 16-bit values.
-```c
-void __agbabi_vmemput2(void *dest, const void *src, size_t n, ptrdiff_t stride);
-void __agbabi_vmemget2(void *dest, const void *src, size_t n, ptrdiff_t stride);
-```
-`____agbabi_vmem*2` assumes that both of its arguments are 2-byte aligned.
-
-The `ptrdiff_t` argument jumps `dest`/`src` after each 16-bit write for `__agbabi_vmemput2`/`__agbabi_vmemget2` respectively.
-
 ## Context switching
 User-level context switching based on the POSIX context control C library.
 ```c
@@ -125,7 +115,7 @@ User-level context switching based on the POSIX context control C library.
 `ucontext_t` type is a structure that has the following fields:
 ```c
 typedef struct ucontext_t {
-    struct ucontext_t * uc_link;
+    struct ucontext_t *uc_link;
     stack_t uc_stack;
     mcontext_t uc_mcontext;
 } ucontext_t;
@@ -185,44 +175,9 @@ void __agbabi_irq_ucontext();
 Behaves identically to `__agbabi_irq_user`, however the `__agbabi_irq_uproc` procedure signature is changed.
 
 ```c
-const ucontext_t *(*__agbabi_irq_uproc)(const ucontext_t *inContext, short flags);
+const ucontext_t* (*__agbabi_irq_uproc)(const ucontext_t *inContext, short flags);
 ```
 The argument `inContext` of the `__agbabi_irq_uproc` procedure will contain a context describing the program state before the IRQ was raised. 
 
 The return value is the context to be set when the IRQ handler is complete.    
 `inContext` must be returned if no context switching is needed.
-
-## Matrix multiplication
-
-### 3x3 matrices
-Unsafe multiplication of two matrices.
-```c
-struct mat3 {
-    int m00; int m01; int m02;
-    int m10; int m11; int m12;
-    int m20; int m21; int m22;
-};
-
-void __agbabi_mat3_mult( const struct mat3 *restrict srcA, const struct mat3 *restrict srcB, struct mat3 *restrict dst);
-void __agbabi_mat3_mult_q( const struct mat3 *restrict srcA, const struct mat3 *restrict srcB, struct mat3 *restrict dst, int q);
-```
-`dst` is filled with the product of `srcA` * `srcB`. `dst` must not overlap with `srcA` or `srcB`.
-
-`__agbabi_mat3_mult_q` will logically shift right each component of the result by value `q`, ideal for fixed point matrices.
-
-### 4x4 matrices
-Unsafe multiplication of two matrices.
-```c
-struct mat4 {
-    int m00; int m01; int m02; int m03;
-    int m10; int m11; int m12; int m13;
-    int m20; int m21; int m22; int m23;
-    int m30; int m31; int m32; int m33;
-};
-
-void __agbabi_mat4_mult( const struct mat4 *restrict srcA, const struct mat4 *restrict srcB, struct mat4 *restrict dst);
-void __agbabi_mat4_mult_q( const struct mat4 *restrict srcA, const struct mat4 *restrict srcB, struct mat4 *restrict dst, int q);
-```
-`dst` is filled with the product of `srcA` * `srcB`. `dst` must not overlap with `srcA` or `srcB`.
-
-`__agbabi_mat4_mult_q` will logically shift right each component of the result by value `q`, ideal for fixed point matrices.
