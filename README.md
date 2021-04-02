@@ -181,3 +181,29 @@ The argument `inContext` of the `__agbabi_irq_uproc` procedure will contain a co
 
 The return value is the context to be set when the IRQ handler is complete.    
 `inContext` must be returned if no context switching is needed.
+
+## OAM and affine matrix copying and setting
+These functions are intended for weaving OAM data with object affine matrices.
+
+`srcA` is expected to point to a structure similar to:
+```c
+struct oam_data  {
+    short attr0;
+    short attr1;
+    short attr2;
+    short padding;
+};
+```
+### OAM/affine copying
+`dest` is filled with the contents of `srcA`, however the highest half-word is copied from `srcB`.   
+This results in `dest` being filled with half-words semi-woven between `srcA` and `srcB`.
+```c
+void __agbabi_oamcpy(void *dest, const oam_data *srcA, const short *srcB, size_t n);
+```
+The `size_t` argument is expected to be a multiple of 8.
+### OAM/affine setting
+`dest` is filled with the first 3 half words of `srcA`, however the 4th half-word is appended with four half-words from `srcB`.
+```c
+void __agbabi_oamset(void *dest, const oam_data *srcA, const short *srcB, size_t n);
+```
+The `size_t` argument is expected to be a multiple of 8.
