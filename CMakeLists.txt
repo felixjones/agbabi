@@ -11,6 +11,7 @@ add_library(agbabi STATIC
     source/memmove.c
     source/memcpy.s
     source/memset.s
+    source/oam.s
     source/rmemcpy.s
     source/sine.s
     source/uidiv.s
