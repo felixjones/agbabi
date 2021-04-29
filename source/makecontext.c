@@ -3,9 +3,9 @@
 
 #define REGISTER_ARGS   ( 4 )
 
-void __agbabi_makecontext( struct ucontext_t *, void ( * )( void ), int, ... ) __attribute__((section(".text"))) __attribute__((target("thumb")));
+void __agbabi_makecontext( struct ucontext_t *, void ( * )( void ), int, ... ) __attribute__((section(".text.__agbabi_makecontext"))) __attribute__((target("thumb")));
 
-static void __agbabi_popcontext() __attribute__((section(".iwram"))) __attribute__((target("arm")));
+static void __agbabi_popcontext() __attribute__((section(".iwram.__agbabi_popcontext"))) __attribute__((target("arm")));
 
 static __attribute__((naked)) void __agbabi_popcontext() {
     asm(

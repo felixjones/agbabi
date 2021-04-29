@@ -9,14 +9,14 @@
 @ Source code taken from https://www.chiark.greenend.org.uk/~theom/riscos/docs/ultimate/a252div.txt
 @ r0: the numerator / r1: the denominator
 @ after it, r0 has the quotient and r1 has the modulo
-    .section .iwram, "ax", %progbits
+    .section .iwram.__aeabi_uidivmod, "ax", %progbits
     .align 2
     .arm
     .global __aeabi_uidivmod
     .type __aeabi_uidivmod STT_FUNC
 __aeabi_uidivmod:
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__aeabi_uidiv, "ax", %progbits
     .align 2
     .arm
     .global __aeabi_uidiv
@@ -28,7 +28,11 @@ __aeabi_uidiv:
     .extern __aeabi_idiv0
     beq     __aeabi_idiv0
 
+    .section .iwram.__agbabi_unsafe_uidiv, "ax", %progbits
+    .align 2
+    .arm
     .global __agbabi_unsafe_uidiv
+    .type __agbabi_unsafe_uidiv STT_FUNC
 __agbabi_unsafe_uidiv:
     @ If n < d, just bail out as well
     cmp     r0, r1      @ n, d

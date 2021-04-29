@@ -35,7 +35,7 @@
 
 #define UCONTEXT_SIZEOF ( MCONTEXT_ARM_CPSR + 4 )
 
-    .section .iwram,"ax",%progbits
+    .section .iwram.__agbabi_irq_ucontext,"ax",%progbits
     .align 2
     .arm
     .func   __agbabi_irq_ucontext

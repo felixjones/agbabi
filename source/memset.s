@@ -15,7 +15,7 @@
 @ memclr might not be word-aligned, calls memset with value 0
 @--------------------------------------------------------------------------------
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__aeabi_memset, "ax", %progbits
     .align 2
     .arm
     .global __aeabi_memset
@@ -29,9 +29,15 @@ __aeabi_memset:
     bhs     .Lcopy_front
     @ Fallthrough __aeabi_memset8/__aeabi_memset4
 
+    .section .iwram.__aeabi_memset8, "ax", %progbits
+    .align 2
+    .arm
     .global __aeabi_memset8
     .type __aeabi_memset8 STT_FUNC
 __aeabi_memset8:
+    .section .iwram.__aeabi_memset4, "ax", %progbits
+    .align 2
+    .arm
     .global __aeabi_memset4
     .type __aeabi_memset4 STT_FUNC
 __aeabi_memset4:
@@ -39,6 +45,9 @@ __aeabi_memset4:
     orr     r2, r2, r2, lsr #8
     orr     r2, r2, r2, lsr #16
 
+    .section .iwram.__agbabi_wordset4, "ax", %progbits
+    .align 2
+    .arm
     .global __agbabi_wordset4
     .type __agbabi_wordset4 STT_FUNC
 __agbabi_wordset4:
@@ -75,12 +84,15 @@ __agbabi_wordset4:
     bhs     .Lset
     bx      lr
 
-    .section .ewram, "ax", %progbits
+    .section .ewram.__aeabi_memclr8, "ax", %progbits
     .align 2
     .thumb
     .global __aeabi_memclr8
     .type __aeabi_memclr8 STT_FUNC
 __aeabi_memclr8:
+    .section .ewram.__aeabi_memclr4, "ax", %progbits
+    .align 2
+    .thumb
     .global __aeabi_memclr4
     .type __aeabi_memclr4 STT_FUNC
 __aeabi_memclr4:
@@ -88,6 +100,9 @@ __aeabi_memclr4:
     ldr     r3, =__agbabi_wordset4
     bx      r3
 
+    .section .ewram.__aeabi_memclr, "ax", %progbits
+    .align 2
+    .thumb
     .global __aeabi_memclr
     .type __aeabi_memclr STT_FUNC
 __aeabi_memclr:
@@ -95,6 +110,9 @@ __aeabi_memclr:
     ldr     r3, =__aeabi_memset
     bx      r3
 
+    .section .ewram.memset, "ax", %progbits
+    .align 2
+    .thumb
     .global memset
     .type memset STT_FUNC
 memset:

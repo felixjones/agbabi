@@ -10,7 +10,7 @@
 @ n is expected to be a multiple of 3+1 half words (8 bytes)
 @--------------------------------------------------------------------------------
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__agbabi_oamcpy, "ax", %progbits
     .align 2
     .arm
     .global __agbabi_oamcpy
@@ -59,6 +59,9 @@ __agbabi_oamcpy:
     pop     {r4-r11,r14}
     bx      lr
 
+    .section .iwram.__agbabi_oamset, "ax", %progbits
+    .align 2
+    .arm
     .global __agbabi_oamset
     .type __agbabi_oamset STT_FUNC
 __agbabi_oamset:

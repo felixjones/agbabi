@@ -9,7 +9,7 @@
 @ rmemcpy might not be word-aligned
 @--------------------------------------------------------------------------------
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__agbabi_rmemcpy, "ax", %progbits
     .align 2
     .arm
     .global __agbabi_rmemcpy
@@ -35,6 +35,9 @@ __agbabi_rmemcpy:
     bhs     .Lcopy_front
     bx      lr
 
+    .section .iwram.__agbabi_rmemcpy4, "ax", %progbits
+    .align 2
+    .arm
     .global __agbabi_rmemcpy4
     .type __agbabi_rmemcpy4 STT_FUNC
 __agbabi_rmemcpy4:

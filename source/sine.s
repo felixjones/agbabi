@@ -12,7 +12,7 @@
 #define QP  ( 15 )
 #define QR  ( 2 * QN - QP )
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__agbabi_sin, "ax", %progbits
     .align 2
     .arm
     .global __agbabi_sin

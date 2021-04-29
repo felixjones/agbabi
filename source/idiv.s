@@ -8,14 +8,14 @@
 
 @ r0: the numerator / r1: the denominator
 @ after it, r0 has the quotient and r1 has the modulo
-    .section .iwram, "ax", %progbits
+    .section .iwram.__aeabi_idivmod, "ax", %progbits
     .align 2
     .arm
     .global __aeabi_idivmod
     .type __aeabi_idivmod STT_FUNC
 __aeabi_idivmod:
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__aeabi_idiv, "ax", %progbits
     .align 2
     .arm
     .global __aeabi_idiv

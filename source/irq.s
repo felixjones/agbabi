@@ -12,13 +12,13 @@
 #define REG_IF      0x4000202
 #define REG_IME     0x4000208
 
-    .section .iwram,"ax",%progbits
+    .section .iwram.__agbabi_irq_uproc,"ax",%progbits
     .align 2
     .weak __agbabi_irq_uproc
 __agbabi_irq_uproc:
     .word  0x00000000
 
-    .section .iwram,"ax",%progbits
+    .section .iwram.__agbabi_irq_empty,"ax",%progbits
     .align 2
     .arm
     .func   __agbabi_irq_empty
@@ -44,7 +44,7 @@ __agbabi_irq_empty:
     .fnend
     .endfunc
 
-    .section .iwram,"ax",%progbits
+    .section .iwram.__agbabi_irq_user,"ax",%progbits
     .align 2
     .arm
     .func   __agbabi_irq_user

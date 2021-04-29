@@ -9,7 +9,7 @@
 @ memcpy might not be word-aligned
 @--------------------------------------------------------------------------------
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__aeabi_memcpy, "ax", %progbits
     .align 2
     .arm
     .global __aeabi_memcpy
@@ -30,9 +30,15 @@ __aeabi_memcpy:
     bhs     .Lcopy_front
     @ Fallthrough __aeabi_memcpy8/__aeabi_memcpy4
 
+    .section .iwram.__aeabi_memcpy8, "ax", %progbits
+    .align 2
+    .arm
     .global __aeabi_memcpy8
     .type __aeabi_memcpy8 STT_FUNC
 __aeabi_memcpy8:
+    .section .iwram.__aeabi_memcpy4, "ax", %progbits
+    .align 2
+    .arm
     .global __aeabi_memcpy4
     .type __aeabi_memcpy4 STT_FUNC
 __aeabi_memcpy4:

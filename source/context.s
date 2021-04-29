@@ -26,7 +26,7 @@
 #define MCONTEXT_ARM_PC     72
 #define MCONTEXT_ARM_CPSR   76
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__agbabi_getcontext, "ax", %progbits
     .align 2
     .arm
     .func   __agbabi_getcontext
@@ -61,7 +61,7 @@ __agbabi_getcontext:
     .fnend
     .endfunc
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__agbabi_setcontext, "ax", %progbits
     .align 2
     .arm
     .func   __agbabi_setcontext
@@ -102,7 +102,7 @@ __agbabi_setcontext:
     .fnend
     .endfunc
 
-    .section .iwram, "ax", %progbits
+    .section .iwram.__agbabi_swapcontext, "ax", %progbits
     .align 2
     .arm
     .func   __agbabi_swapcontext
