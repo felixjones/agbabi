@@ -22,7 +22,7 @@ __agbabi_rmemcpy:
     add     r1, r1, r2
     bne     .Lunaligned
 
-    rsb     r12, r12, #4
+    and     r12, r2, #3
     sub     r2, r2, r12
     push    {r12,lr}
     mov     lr, pc
