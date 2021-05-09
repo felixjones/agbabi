@@ -21,7 +21,7 @@ __aeabi_memcpy:
     movne   r12, r2
     bne     .Lcopy
 
-    rsb     r12, r12, #4 @ BUG: #4 needs to be <= r2!!
+    and     r12, r2, #3
     sub     r2, r2, r12
 .Lcopy_front:
     subs    r12, r12, #1
