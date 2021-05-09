@@ -7,12 +7,12 @@ extern "C" {
 
 #include <stddef.h>
 
-typedef struct {
+typedef struct stack_t {
     void * ss_sp;
     size_t ss_size;
 } stack_t;
 
-typedef struct {
+typedef struct mcontext_t {
     unsigned long int arm_r0;
     unsigned long int arm_r1;
     unsigned long int arm_r2;

@@ -16,9 +16,6 @@
     .type __aeabi_uidivmod STT_FUNC
 __aeabi_uidivmod:
 
-    .section .iwram.__aeabi_uidiv, "ax", %progbits
-    .align 2
-    .arm
     .global __aeabi_uidiv
     .type __aeabi_uidiv STT_FUNC
 __aeabi_uidiv:
@@ -28,9 +25,6 @@ __aeabi_uidiv:
     .extern __aeabi_idiv0
     beq     __aeabi_idiv0
 
-    .section .iwram.__agbabi_unsafe_uidiv, "ax", %progbits
-    .align 2
-    .arm
     .global __agbabi_unsafe_uidiv
     .type __agbabi_unsafe_uidiv STT_FUNC
 __agbabi_unsafe_uidiv:

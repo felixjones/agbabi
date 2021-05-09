@@ -29,15 +29,9 @@ __aeabi_memset:
     bhs     .Lcopy_front
     @ Fallthrough __aeabi_memset8/__aeabi_memset4
 
-    .section .iwram.__aeabi_memset8, "ax", %progbits
-    .align 2
-    .arm
     .global __aeabi_memset8
     .type __aeabi_memset8 STT_FUNC
 __aeabi_memset8:
-    .section .iwram.__aeabi_memset4, "ax", %progbits
-    .align 2
-    .arm
     .global __aeabi_memset4
     .type __aeabi_memset4 STT_FUNC
 __aeabi_memset4:
@@ -45,9 +39,6 @@ __aeabi_memset4:
     orr     r2, r2, r2, lsr #8
     orr     r2, r2, r2, lsr #16
 
-    .section .iwram.__agbabi_wordset4, "ax", %progbits
-    .align 2
-    .arm
     .global __agbabi_wordset4
     .type __agbabi_wordset4 STT_FUNC
 __agbabi_wordset4:
@@ -110,9 +101,9 @@ __aeabi_memclr:
     ldr     r3, =__aeabi_memset
     bx      r3
 
-    .section .ewram.memset, "ax", %progbits
+    .section .iwram.memset, "ax", %progbits
     .align 2
-    .thumb
+    .arm
     .global memset
     .type memset STT_FUNC
 memset:

@@ -21,7 +21,7 @@ __aeabi_memcpy:
     movne   r12, r2
     bne     .Lcopy
 
-    rsb     r12, r12, #4
+    rsb     r12, r12, #4 @ BUG: #4 needs to be <= r2!!
     sub     r2, r2, r12
 .Lcopy_front:
     subs    r12, r12, #1
@@ -30,15 +30,9 @@ __aeabi_memcpy:
     bhs     .Lcopy_front
     @ Fallthrough __aeabi_memcpy8/__aeabi_memcpy4
 
-    .section .iwram.__aeabi_memcpy8, "ax", %progbits
-    .align 2
-    .arm
     .global __aeabi_memcpy8
     .type __aeabi_memcpy8 STT_FUNC
 __aeabi_memcpy8:
-    .section .iwram.__aeabi_memcpy4, "ax", %progbits
-    .align 2
-    .arm
     .global __aeabi_memcpy4
     .type __aeabi_memcpy4 STT_FUNC
 __aeabi_memcpy4:

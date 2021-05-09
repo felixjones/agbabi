@@ -15,9 +15,6 @@
     .type __aeabi_idivmod STT_FUNC
 __aeabi_idivmod:
 
-    .section .iwram.__aeabi_idiv, "ax", %progbits
-    .align 2
-    .arm
     .global __aeabi_idiv
     .type __aeabi_idiv STT_FUNC
 __aeabi_idiv:
