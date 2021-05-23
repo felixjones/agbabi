@@ -43,10 +43,17 @@ __aeabi_ldiv:
     rsc     r3, r3, #0
 
 .LdenominatorIsPositive:
+    @ Check if the high register of the denominator is zero
+    cmp     r3, #0
+    adreq   lr, .skipRoutinePastZero
+    .extern __agbabi_unsafe_uluidiv
+    beq     __agbabi_unsafe_uluidiv
+
     @ Call the unsigned division
     .extern __agbabi_unsafe_uldiv
     bl      __agbabi_unsafe_uldiv
 
+.skipRoutinePastZero:
     @ This moves "numerator is negative" to overflow flag and
     @ "denominator is negative" to sign flag
     msr     cpsr_f, r12
