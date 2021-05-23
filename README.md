@@ -38,6 +38,21 @@ __value_in_regs uidiv_return __aeabi_uidivmod(unsigned numerator, unsigned denom
 ```
 The division functions take the numerator and denominator in that order.
 
+## Integer (64/64 → 64) division functions
+The 64-bit integer division functions return the quotient across {r0, r1} or both quotient and remainder in {r0, r1} and {r2, r3}.    
+`__value_in_regs` is a hypothetical macro that instructs `struct` members to be passed by register.
+```c
+long long __aeabi_ldiv(long long numerator, long long denominator);
+unsigned long long __aeabi_uldiv(unsigned long long numerator, unsigned long long denominator);
+
+typedef struct { long long quot; long long rem; } ldiv_return;
+typedef struct { unsigned long long quot; long long unsigned rem; } uldiv_return;
+
+__value_in_regs ldiv_return __aeabi_ldivmod(long long numerator, long long denominator);
+__value_in_regs uldiv_return __aeabi_uldivmod(unsigned long long numerator, unsigned long long denominator);
+```
+The division functions take the numerator and denominator in that order.
+
 ## Memory copying, clearing, and setting
 ### Memory copying
 Memcpy-like helper functions are needed to implement structure assignment.
@@ -70,13 +85,45 @@ The `memclr` functions simplify a very common special case of `memset`, namely t
 The `size_t` argument does not need to be a multiple of 4 for the 4/8-byte aligned versions, which allows clears and sets with a non-constant size to be specialized according to the destination alignment.
 
 # agbabi helper functions
-## Integer (32/32 → 32) division functions
+## Unsafe integer (32/32 → 32) division function
 An unsafe implementation of `__aeabi_uidivmod` that skips the divide by zero check.    
 `__value_in_regs` is a hypothetical macro that instructs `struct` members to be passed by register.
 ```c
 typedef struct { unsigned quot; unsigned rem; } uidiv_return;
 
 __value_in_regs uidiv_return __agbabi_unsafe_uidiv(unsigned numerator, unsigned denominator);
+```
+`__aeabi_idiv0` is not called in this situation. The quotient and remainder of a divide by zero is not defined.
+
+## Unsafe integer (64/64 → 64) division function
+An unsafe implementation of `__aeabi_uldivmod` that skips the divide by zero check.    
+`__value_in_regs` is a hypothetical macro that instructs `struct` members to be passed by register.
+```c
+typedef struct { unsigned long long quot; unsigned long long rem; } uldiv_return;
+
+__value_in_regs uldiv_return __agbabi_unsafe_uldiv(unsigned long long numerator, unsigned long long denominator);
+```
+`__aeabi_idiv0` is not called in this situation. The quotient and remainder of a divide by zero is not defined.
+
+## Integer (64/32 → 64) division functions
+The 64-bit/32-bit integer division functions return the quotient in {r0, r1} or both quotient and remainder in {r0, r1} and {r2}. {r3} is cleared to zero.    
+`__value_in_regs` is a hypothetical macro that instructs `struct` members to be passed by register.
+```c
+unsigned long long __agbabi_uluidiv(unsigned long long numerator, unsigned denominator);
+
+typedef struct { unsigned long long quot; unsigned rem; unsigned zero } uluidiv_return;
+
+__value_in_regs uluidiv_return __agbabi_uluidivmod(unsigned long long numerator, unsigned denominator);
+```
+The division functions take the numerator and denominator in that order.
+
+### Unsafe integer (64/32 → 64) division
+An unsafe implementation of `__agbabi_uluidiv` that skips the divide by zero check.    
+`__value_in_regs` is a hypothetical macro that instructs `struct` members to be passed by register.
+```c
+typedef struct { unsigned long long quot; unsigned rem; unsigned zero } uluidiv_return;
+
+__value_in_regs uluidiv_return __agbabi_unsafe_uluidiv(unsigned long long numerator, unsigned denominator);
 ```
 `__aeabi_idiv0` is not called in this situation. The quotient and remainder of a divide by zero is not defined.
 

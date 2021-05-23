@@ -7,6 +7,7 @@ add_library(agbabi STATIC
     source/irq.s
     source/idiv.s
     source/irqcontext.s
+    source/ldiv.s
     source/makecontext.c
     source/memmove.c
     source/memcpy.s
@@ -15,6 +16,8 @@ add_library(agbabi STATIC
     source/rmemcpy.s
     source/sine.s
     source/uidiv.s
+    source/uldiv.s
+    source/uluidiv.s
 )
 target_include_directories(agbabi SYSTEM PUBLIC "include/")
 
