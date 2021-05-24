@@ -11,10 +11,9 @@
     .global __aeabi_lmul
     .type __aeabi_lmul STT_FUNC
 __aeabi_lmul:
-	mov	    r12, r0
-	push	{r11}
-	umull	r0, r11, r12, r2
-	mla	    r12, r3, r12, r11
-	pop	    {r11}
-	mla	    r1, r2, r1, r12
-	bx	    lr
+    mov     r12, r0
+    mul     r3, r0, r3
+    mla     r1, r2, r1, r3
+    umull   r0, r3, r12, r2
+    add     r1, r1, r3
+    bx      lr
