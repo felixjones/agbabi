@@ -97,6 +97,7 @@ __value_in_regs uidiv_return __agbabi_unsafe_uidiv(unsigned numerator, unsigned 
 
 ## Unsafe integer (64/64 → 64) division function
 An unsafe implementation of `__aeabi_uldivmod` that skips the divide by zero check.    
+The denominator must have a non-zero hi-word (greater than `0xffffffff`).    
 `__value_in_regs` is a hypothetical macro that instructs `struct` members to be passed by register.
 ```c
 typedef struct { unsigned long long quot; unsigned long long rem; } uldiv_return;
