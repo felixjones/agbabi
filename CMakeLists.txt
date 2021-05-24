@@ -7,7 +7,11 @@ add_library(agbabi STATIC
     source/irq.s
     source/idiv.s
     source/irqcontext.s
+    source/lasr.s
     source/ldiv.s
+    source/llsl.s
+    source/llsr.s
+    source/lmul.s
     source/makecontext.c
     source/memmove.c
     source/memcpy.s

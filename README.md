@@ -53,6 +53,22 @@ __value_in_regs uldiv_return __aeabi_uldivmod(unsigned long long numerator, unsi
 ```
 The division functions take the numerator and denominator in that order.
 
+## Integer (64×64 → 64) multiplication function
+Long long implementation of integer multiplication.    
+The 64-bit multiplication function returns the result across {r0, r1}.
+```c
+long long __aeabi_lmul(long long a, long long b);
+```
+
+## Integer 64 bit-shift functions
+Long long implementations of arithmetic shift right, logical shift left and logical shift right.    
+The 64-bit shift functions return the result across {r0, r1}.
+```c
+long long __aeabi_lasr(long long x, int n);
+long long __aeabi_llsl(long long x, int n);
+long long __aeabi_llsr(long long x, int n);
+```
+
 ## Memory copying, clearing, and setting
 ### Memory copying
 Memcpy-like helper functions are needed to implement structure assignment.

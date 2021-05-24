@@ -21,8 +21,8 @@ __aeabi_ldiv:
     @ Test division by zero
     cmp     r3, #0
     cmpeq   r2, #0
-    .extern __aeabi_idiv0
-    beq     __aeabi_idiv0
+    .extern __aeabi_ldiv0
+    beq     __aeabi_ldiv0
 
     @ Move the lr to r12 and make the numbers positive
     mov     r12, lr

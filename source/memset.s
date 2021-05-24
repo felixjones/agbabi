@@ -101,9 +101,9 @@ __aeabi_memclr:
     ldr     r3, =__aeabi_memset
     bx      r3
 
-    .section .iwram.memset, "ax", %progbits
+    .section .ewram.memset, "ax", %progbits
     .align 2
-    .arm
+    .thumb
     .global memset
     .type memset STT_FUNC
 memset:

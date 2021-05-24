@@ -23,8 +23,8 @@ __agbabi_uluidiv:
 
     @ Check for division by zero
     cmp     r2, #0
-    .extern __aeabi_idiv0
-    beq     __aeabi_idiv0
+    .extern __aeabi_ldiv0
+    beq     __aeabi_ldiv0
 
     .global __agbabi_unsafe_uluidiv
     .type __agbabi_unsafe_uluidiv STT_FUNC
