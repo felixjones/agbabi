@@ -154,6 +154,15 @@ Argument `x` is treated as a signed 16-bit binary angle measurement between -32,
 The return value is a 32-bit signed fixed-point integer between with 29 fractional bits. In fixed-point, it ranges between -1 and +1 (-536870912 and +536870911 as a 32-bit signed integer).
 
 ## Memory copying, clearing, and setting
+### 16-bit memcpy
+Used by `__aeabi_memcpy` for cases where either `dest` or `src` are half-aligned.
+```c
+void __agbabi_memcpy2(void *dest, const void *src, size_t n);
+```
+`__agbabi_memcpy2` assumes that both of its arguments are 2-byte aligned. This is ideal for VRAM 
+
+The `size_t` argument does not need to be a multiple of 4 for the 4-byte aligned version, which allows copies with a non-constant size to be specialized according to source and destination alignment.
+
 ### Reverse memory copying
 Used by `__aeabi_memmove` for reverse-copying in cases where `dest > src`.
 ```c
