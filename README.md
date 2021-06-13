@@ -22,6 +22,13 @@ void* memset( void *dest, int ch, size_t count );
 ```
 Compilers sometimes replace memory-clearing loops with a call to `memset`.
 
+## memmove
+Calls either `__agbabi_rmemcpy` or `__aeabi_memcpy` and returns dest.
+```c
+void* memmove(void *dest, const void *src, size_t count);
+```
+Compilers sometimes replace overlapping memory-copying loops with a call to `memmove`.
+
 # aeabi helper functions
 ## Integer (32/32 → 32) division functions
 The 32-bit integer division functions return the quotient in r0 or both quotient and remainder in {r0, r1}.    
@@ -161,17 +168,24 @@ void __agbabi_memcpy2(void *dest, const void *src, size_t n);
 ```
 `__agbabi_memcpy2` assumes that both of its arguments are 2-byte aligned. This is ideal for VRAM 
 
-The `size_t` argument does not need to be a multiple of 4 for the 4-byte aligned version, which allows copies with a non-constant size to be specialized according to source and destination alignment.
+### 16-bit memmove
+Used by `__aeabi_memmove` for cases where either `dest` or `src` are half-aligned.
+```c
+void __agbabi_memmove2(void *dest, const void *src, size_t n);
+```
+`__agbabi_memmove2` assumes that both of its arguments are 2-byte aligned. This is ideal for VRAM
 
 ### Reverse memory copying
 Used by `__aeabi_memmove` for reverse-copying in cases where `dest > src`.
 ```c
 void __agbabi_rmemcpy4(void *dest, const void *src, size_t n);
+void __agbabi_rmemcpy2(void *dest, const void *src, size_t n);
 void __agbabi_rmemcpy(void *dest, const void *src, size_t n);
 ```
-`__agbabi_rmemcpy4` assumes that both of its arguments are 4-byte aligned.
+`__agbabi_rmemcpy4` assumes that both of its arguments are 4-byte aligned.    
+`__agbabi_rmemcpy2` assumes that both of its arguments are 2-byte aligned.
 
-The `size_t` argument does not need to be a multiple of 4 for the 4-byte aligned version, which allows copies with a non-constant size to be specialized according to source and destination alignment.
+The `size_t` argument does not need to be a multiple of 4 or 2 for the 4-byte or 2-byte aligned versions, which allows copies with a non-constant size to be specialized according to source and destination alignment.
 
 ### Memory setting
 The full 32-bits of `c` are copied into `dest`, which is assumed to be 4-byte aligned.
