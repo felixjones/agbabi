@@ -13,7 +13,7 @@ add_library(agbabi STATIC
     source/llsr.s
     source/lmul.s
     source/makecontext.c
-    source/memmove.c
+    source/memmove.s
     source/memcpy.s
     source/memset.s
     source/oam.s
