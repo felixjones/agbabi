@@ -8,7 +8,7 @@ void __agbabi_makecontext( struct ucontext_t *, void ( * )( void ), int, ... ) _
 static void __agbabi_popcontext() __attribute__((section(".iwram.__agbabi_popcontext"))) __attribute__((target("arm")));
 
 static __attribute__((naked)) void __agbabi_popcontext() {
-    asm(
+    __asm__(
         "pop\t{r0}\r\n"
         "cmp\tr0, #0\r\n"
         ".extern\t__agbabi_setcontext\r\n"
