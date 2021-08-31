@@ -25,5 +25,8 @@ add_library(agbabi STATIC
 )
 target_include_directories(agbabi SYSTEM PUBLIC "include/")
 
+gba_clang_minsizerel(CMAKE_C_FLAGS_MINSIZEREL)
+set(CMAKE_BUILD_TYPE MinSizeRel)
+
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -marm -x assembler-with-cpp")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -marm -Wall -fno-strict-aliasing -Os")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -marm -Wall -Wextra -Wno-unused-parameter")

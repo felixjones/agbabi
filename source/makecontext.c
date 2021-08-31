@@ -38,7 +38,7 @@ void __agbabi_makecontext( struct ucontext_t * ucp, void ( * func )( void ), int
     va_list vl;
     va_start( vl, argc );
 
-    long unsigned int reg;
+    int reg;
     long unsigned int * regptr = &ucp->uc_mcontext.arm_r0;
 
     for ( reg = 0; reg < argc && reg < REGISTER_ARGS; ++reg ) {
