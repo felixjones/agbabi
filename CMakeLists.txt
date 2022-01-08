@@ -12,6 +12,7 @@ cmake_minimum_required(VERSION 3.0)
 project(agbabi ASM C)
 
 add_library(agbabi STATIC
+    source/context.s
     source/idiv.s
     source/ldiv.s
     source/lmul.s
@@ -23,10 +24,12 @@ add_library(agbabi STATIC
     source/uidiv.s
     source/uldiv.s
     source/uluidiv.s
+
+    source/makecontext.c
 )
 
-target_include_directories(agbabi SYSTEM PUBLIC include/)
+target_include_directories(agbabi SYSTEM PUBLIC include/ include/sys/)
 target_compile_options(agbabi PRIVATE
     $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
-    $<$<COMPILE_LANGUAGE:C>:-Wall -Wextra>
+    $<$<COMPILE_LANGUAGE:C>:-Wall -Wextra -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mthumb>
 )

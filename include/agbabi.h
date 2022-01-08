@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include <stddef.h>
+#include <sys/ucontext.h>
 
 /// Copies n bytes from src to dest (forward)
 /// Assumes dest and src are 2-byte aligned
@@ -61,6 +62,32 @@ unsigned long long __agbabi_uluidiv(unsigned long long numerator, unsigned int d
 /// \param x 16-bit binary angle measurement
 /// \return 32-bit signed fixed point (Q29) between -1 and +1
 int __agbabi_sin(int x);
+
+/// Reads the current machine context into ucp
+/// \param ucp Pointer to context structure
+/// \return 0
+int __agbabi_getcontext(ucontext_t *ucp);
+
+/// Sets the current machine context to ucp
+/// \param ucp Pointer to context structure
+/// \return Does not return
+int __agbabi_setcontext(const ucontext_t *ucp) __attribute__ ((noreturn));
+
+/// Writes current context into oucp, and switches to ucp
+/// \param oucp Output address for current context
+/// \param ucp Context to swap to
+/// \return Although technically this does not return, it will appear to return 0 when switching to oucp
+int __agbabi_swapcontext(ucontext_t *__restrict__ oucp, const ucontext_t *__restrict__ ucp);
+
+/// Modifies context pointer to by ucp to invoke func with __agbabi_setcontext
+/// Before invoking, the caller must allocate a new stack for
+/// this context and assign its address to ucp->uc_stack, and define
+/// a successor context and assign its address to ucp->uc_link.
+/// \param ucp Pointer to context structure
+/// \param func Function to invoke with __agbabi_setcontext
+/// \param argc Number of arguments passed to func
+/// \param ... List of arguments to be passed to func
+void __agbabi_makecontext(ucontext_t* ucp, void(*func)(), int argc, ...);
 
 #if defined __has_attribute
 #if __has_attribute(__vector_size__)
