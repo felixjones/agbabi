@@ -14,6 +14,7 @@ project(agbabi ASM C)
 add_library(agbabi STATIC
     source/context.s
     source/idiv.s
+    source/irq.s
     source/ldiv.s
     source/lmul.s
     source/memcpy.s

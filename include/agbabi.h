@@ -89,6 +89,15 @@ int __agbabi_swapcontext(ucontext_t *__restrict__ oucp, const ucontext_t *__rest
 /// \param ... List of arguments to be passed to func
 void __agbabi_makecontext(ucontext_t* ucp, void(*func)(), int argc, ...);
 
+/// Empty IRQ handler that simply acknowledges raised IRQs
+void __agbabi_irq_empty();
+
+/// Nested IRQ handler that calls __agbabi_irq_uproc with the raised IRQ flags
+void __agbabi_irq_user();
+
+/// User procedure called by __agbabi_irq_user
+extern void(*__agbabi_irq_uproc)(short irqFlags);
+
 #if defined __has_attribute
 #if __has_attribute(__vector_size__)
 
