@@ -36,7 +36,7 @@ __agbabi_irq_empty:
     strh    r1, [r0, #(REG_IF - REG_IE_IF)]
     str     r2, [r0, #(REG_BIOSIF - REG_IE_IF)]
 
-    bx lr
+    bx      lr
 
     .section .iwram.__agbabi_irq_user,"ax",%progbits
     .global __agbabi_irq_user
@@ -61,8 +61,8 @@ __agbabi_irq_user:
     strh    r2, [r1]
 
     // Disable REG_IME
-    mov     r2, #0
-    str     r2, [r1, #(REG_IME - REG_IE_IF)]
+    // Use r1/REG_BASE because lowest bit is clear
+    str     r1, [r1, #(REG_IME - REG_IE_IF)]
 
     // Change to user mode
     mrs     r2, cpsr
@@ -75,17 +75,17 @@ __agbabi_irq_user:
     ldr     r2, =__agbabi_irq_uproc
     ldr     r2, [r2]
 
-    push    { r0-r1, r4-r11, lr }
+    push    {r0-r1, r4-r11, lr}
 
     // Call __agbabi_irq_proc
     mov     lr, pc
     bx      r2
 
-    pop     { r0-r1, r4-r11, lr }
+    pop     {r0-r1, r4-r11, lr}
 
     // Disable REG_IME again
-    mov     r2, #0
-    str     r2, [r1, #(REG_IME - REG_IE_IF)]
+    // Use r1/REG_BASE because lowest bit is clear
+    str     r1, [r1, #(REG_IME - REG_IE_IF)]
 
     // Change to irq mode
     mrs     r2, cpsr
@@ -102,4 +102,4 @@ __agbabi_irq_user:
     mov     r2, #1
     str     r2, [r1, #(REG_IME - REG_IE_IF)]
 
-    bx lr
+    bx      lr
