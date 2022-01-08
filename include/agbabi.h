@@ -71,7 +71,7 @@ int __agbabi_getcontext(ucontext_t *ucp);
 /// Sets the current machine context to ucp
 /// \param ucp Pointer to context structure
 /// \return Does not return
-int __agbabi_setcontext(const ucontext_t *ucp) __attribute__ ((noreturn));
+int __agbabi_setcontext(const ucontext_t *ucp) __attribute__((noreturn));
 
 /// Writes current context into oucp, and switches to ucp
 /// \param oucp Output address for current context
