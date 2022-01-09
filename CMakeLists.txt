@@ -32,5 +32,5 @@ add_library(agbabi STATIC
 target_include_directories(agbabi SYSTEM PUBLIC include/ include/sys/)
 target_compile_options(agbabi PRIVATE
     $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
-    $<$<COMPILE_LANGUAGE:C>:-Wall -Wextra -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mthumb>
+    $<$<COMPILE_LANGUAGE:C>:-mabi=aapcs -march=armv4t -mcpu=arm7tdmi -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter>
 )
