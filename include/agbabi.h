@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include <limits.h>
 #include <stddef.h>
 #include <sys/ucontext.h>
 
@@ -96,7 +97,68 @@ void __agbabi_irq_empty();
 void __agbabi_irq_user();
 
 /// User procedure called by __agbabi_irq_user
+/// \param irqFlags Raised IRQ flags bitmask
 extern void(*__agbabi_irq_uproc)(short irqFlags);
+
+/// Multiboot protocol state flags
+/// \param agbabi_mb_WAIT Wait requested for clients to connect. Callback should delay before returning. (data = number of attempts)
+/// \param agbabi_mb_CONNECTED Available clients are connected (data = client bitmask)
+/// \param agbabi_mb_HEADER Sending header (data = bytes sent)
+/// \param agbabi_mb_PALETTE Sending palette (data = pending client bitmask)
+/// \param agbabi_mb_MULTIBOOT Calling BIOS Multiboot (data = 0)
+typedef enum agbabi_mb_stat_t {
+    agbabi_mb_WAIT = 0,
+    agbabi_mb_CONNECTED,
+    agbabi_mb_HEADER,
+    agbabi_mb_PALETTE,
+    agbabi_mb_MULTIBOOT,
+
+    agbabi_mb_STAT_SZ = INT_MAX
+} agbabi_mb_stat_t;
+
+/// User callback used in agbabi_mb_param_t
+/// \param stat Current agbabi_mb_stat_t state
+/// \param data Accompanying data for agbabi_mb_stat_t state
+/// \param void* User pointer sent to callback
+/// \return 1 to cancel Multiboot, 0 to continue
+typedef int(*agbabi_mb_callback_t)(int stat, int data, void* uptr);
+
+/// Structure containing options for __agbabi_multiboot
+/// \param srcp Address of data to send
+/// \param srclen Byte length of data
+/// \param client_mask Bitmask of clients to send to (1 << ID, 0xF for all clients)
+/// \param palette Byte palette (must have bits 0x81 set)
+/// \param callback Function pointer of type agbabi_mb_callback_t (Required)
+/// \param uptr User pointer to send to agbabi_mb_callback_t
+typedef struct agbabi_mb_param_t {
+    const void* srcp;
+    size_t srclen;
+    int client_mask;
+    int palette;
+    agbabi_mb_callback_t callback;
+    void* uptr;
+} agbabi_mb_param_t;
+
+typedef enum agbabi_mb_err_t {
+    agbabi_mb_SUCCESS = 0,
+    agbabi_mb_CANCELLED = 1,
+    agbabi_mb_NOT_HOST = 2,
+    agbabi_mb_TIMEOUT = 3,
+    agbabi_mb_FAIL_ACK = 4, // top 16-bits is mask of failed clients
+    agbabi_mb_FAIL_HEADER = 5, // top 16-bits is mask of failed clients
+    agbabi_mb_FAIL_PALETTE = 6, // top 16-bits is mask of failed clients
+    agbabi_mb_FAIL_MULTIBOOT = 7,
+
+    agbabi_mb_ERR_SZ = INT_MAX
+} agbabi_mb_err_t;
+
+/// Performs Multiboot program sending protocol
+/// Interrupts must be disabled before this call
+/// A callback is used to signal current state this can be used to temporarily enable interrupts or switch contexts
+/// The callback is expected to implement a timed delay for state "agbabi_mb_WAIT"
+/// \param param Pointer to agbabi_mb_param_t
+/// \return Error code describing what problem was encountered (0 is success)
+int __agbabi_multiboot(const agbabi_mb_param_t* param);
 
 #if defined __has_attribute
 #if __has_attribute(__vector_size__)

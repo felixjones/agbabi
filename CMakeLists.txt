@@ -27,6 +27,7 @@ add_library(agbabi STATIC
     source/uluidiv.s
 
     source/makecontext.c
+    source/multiboot.c
 )
 
 target_include_directories(agbabi SYSTEM PUBLIC include/ include/sys/)
