@@ -91,8 +91,8 @@ __agbabi_unsafe_uluidivmod:
 .LbridgeTo32:
     mov     r1, r2          // move the denominator to the actual position
     push    {lr}            // prepare to call the subroutine
-    .extern __agbabi_unsafe_uidiv
-    bl      __agbabi_unsafe_uidiv  // call the 32x32 routine
+    .extern __agbabi_unsafe_uidivmod
+    bl      __agbabi_unsafe_uidivmod  // call the 32x32 routine
     pop     {lr}            // pop the link register
     mov     r2, r1          // move the remainder to the desired location
     mov     r1, #0          // zero-out the most significant words
