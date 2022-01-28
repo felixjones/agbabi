@@ -21,12 +21,14 @@ add_library(agbabi STATIC
     source/memmove.s
     source/memset.s
     source/rmemcpy.s
+    source/rtc.s
     source/sine.s
     source/uidiv.s
     source/uldiv.s
     source/uluidiv.s
 
     source/makecontext.c
+    source/rtc.c
 )
 
 target_include_directories(agbabi SYSTEM PUBLIC include/ include/sys/)

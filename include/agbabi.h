@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include <limits.h>
 #include <stddef.h>
 #include <sys/ucontext.h>
 
@@ -98,6 +99,61 @@ void __agbabi_irq_user();
 /// User procedure called by __agbabi_irq_user
 extern void(*__agbabi_irq_uproc)(short irqFlags);
 
+typedef enum agbabi_rtc_err_t {
+    agbabi_rtc_OK = 0,
+    agbabi_rtc_EPOWER = 1,
+    agbabi_rtc_E12HOUR = 2,
+    agbabi_rtc_EYEAR = 3,
+    agbabi_rtc_EMON = 4,
+    agbabi_rtc_EDAY = 5,
+    agbabi_rtc_EWDAY = 6,
+    agbabi_rtc_EHOUR = 7,
+    agbabi_rtc_EMIN = 8,
+    agbabi_rtc_ESEC = 9,
+
+    agbabi_rtc_ERR_SZ = INT_MAX
+} agbabi_rtc_err_t;
+
+/// Initialize GPIO pins for RTC
+/// \return agbabi_rtc_err_t error code (0 for success)
+int __agbabi_rtc_init();
+
+typedef enum agbabi_rtc_stat_t {
+    agbagbi_rtc_INTFE = 0x01,
+    agbagbi_rtc_INTME = 0x02,
+    agbagbi_rtc_INTAE = 0x04,
+    agbagbi_rtc_24HOUR = 0x40,
+    agbagbi_rtc_POWER = 0x80,
+
+    agbabi_rtc_STAT_SZ = INT_MAX
+} agbabi_rtc_stat_t;
+
+/// Get the status flags of the RTC
+/// \return bitmask of agbabi_rtc_stat_t
+int __agbabi_rtc_status();
+
+/// Resets RTC (also switches to 24-hour mode)
+void __agbabi_rtc_reset();
+
+typedef enum agbabi_rtc_time_t {
+    agbagbi_rtc_TEST = 0x80,
+
+    agbabi_rtc_TIME_SZ = INT_MAX
+} agbabi_rtc_time_t;
+
+/// Get the current, raw time from the RTC
+/// If RTC is in TEST mode: agbagbi_rtc_TEST will be set
+/// \return Raw time in BCD
+int __agbabi_rtc_time();
+
+/// Get the current, raw date & time from the RTC as a long long int
+/// \return lower 32-bits = raw time in BCD, upper 32-bits = raw date in BCD
+long long int __agbabi_rtc_ldatetime();
+
+/// Writes lowest 8 bits of n to RTC
+/// \param n data to write (lowest 8 bits used)
+void __agbabi_rtc_write8(int n);
+
 #if defined __has_attribute
 #if __has_attribute(__vector_size__)
 
@@ -127,6 +183,10 @@ unsigned long long __attribute__((__vector_size__(16))) __agbabi_uluidivmod(unsi
 /// \param denominator
 /// \return [quotient, remainder]
 unsigned long long __attribute__((__vector_size__(16))) __agbabi_unsafe_uluidivmod(unsigned long long numerator, int denominator);
+
+/// Get the current, raw date & time from the RTC
+/// \return [raw time in BCD, raw date in BCD]
+int __attribute__((__vector_size__(8))) __agbabi_rtc_datetime();
 
 #endif
 #endif

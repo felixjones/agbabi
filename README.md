@@ -232,6 +232,58 @@ void(*__agbabi_irq_uproc)(short irqFlags);
 ```
 The argument `flags` of the `__agbabi_irq_uproc` procedure will contain a mask of the raised IRQs.
 
+### Real Time Clock
+
+Requires RTC chip on cartridge.
+
+#### Initialise RTC
+
+Initializes the RTC clock, returning a non-zero error code if initialization fails.
+
+```c
+int __agbabi_rtc_init();
+```
+
+`__agbabi_rtc_init` returns 0 on success.
+
+**The GPIO port will be left ENABLED on success.**
+
+#### Querying time
+
+Retrieve the raw chip time and date.
+
+```c
+int __agbabi_rtc_time();
+long long int __agbabi_rtc_ldatetime();
+int __attribute__((__vector_size__(8))) __agbabi_rtc_datetime();
+```
+
+These return big-endian BCD encoded values.
+
+`ldatetime` and `datetime` stores date in the upper 32-bits, time in the lower 32-bits.
+
+#### RTC status
+
+Returns the RTC chip status.
+
+```c
+int __agbabi_rtc_status();
+```
+
+Resets the RTC status.
+
+```c
+void __agbabi_rtc_reset();
+```
+
+#### Modifying RTC
+
+Writes 8 bits to RTC chip.
+
+```c
+void __agbabi_rtc_write8(int n);
+```
+
 ## POSIX library
 
 ### getcontext
@@ -257,3 +309,14 @@ Alias of `__aeabi_swapcontext`.
 ```c
 int swapcontext(ucontext_t *restrict oucp, const ucontext_t *restrict ucp);
 ```
+
+### gettimeofday
+Writes the current time of day to `tv`.
+
+`tz` is unused.
+
+Returns 0 on success.
+```c
+int _gettimeofday(struct timeval* restrict tv, void* restrict tz);
+```
+This is used internally by the C time APIs.
