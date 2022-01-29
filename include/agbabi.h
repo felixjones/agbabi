@@ -146,13 +146,21 @@ typedef enum agbabi_rtc_time_t {
 /// \return Raw time in BCD
 int __agbabi_rtc_time();
 
-/// Get the current, raw date & time from the RTC as a long long int
+/// Get the current, raw date & time from the RTC as a long long
 /// \return lower 32-bits = raw time in BCD, upper 32-bits = raw date in BCD
-long long int __agbabi_rtc_ldatetime();
+long long __agbabi_rtc_ldatetime();
 
 /// Writes lowest 8 bits of n to RTC
 /// \param n data to write (lowest 8 bits used)
 void __agbabi_rtc_write8(int n);
+
+/// Set the Hour, Minute, Second
+/// \param time raw BCD (second, minute, hour)
+void __agbabi_rtc_settime(int time);
+
+/// Set the time and date
+/// \param datetime lower 32-bits = raw BCD time, upper 32-bits = raw BCD date
+void __agbabi_rtc_setldatetime(long long datetime);
 
 #if defined __has_attribute
 #if __has_attribute(__vector_size__)
@@ -187,6 +195,10 @@ unsigned long long __attribute__((__vector_size__(16))) __agbabi_unsafe_uluidivm
 /// Get the current, raw date & time from the RTC
 /// \return [raw time in BCD, raw date in BCD]
 int __attribute__((__vector_size__(8))) __agbabi_rtc_datetime();
+
+/// Set the time and date
+/// \param datetime [raw BCD time, raw BCD date]
+void __agbabi_rtc_setdatetime(int __attribute__((__vector_size__(8))) datetime);
 
 #endif
 #endif

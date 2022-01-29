@@ -254,7 +254,7 @@ Retrieve the raw chip time and date.
 
 ```c
 int __agbabi_rtc_time();
-long long int __agbabi_rtc_ldatetime();
+long long __agbabi_rtc_ldatetime();
 int __attribute__((__vector_size__(8))) __agbabi_rtc_datetime();
 ```
 
@@ -284,6 +284,16 @@ Writes 8 bits to RTC chip.
 void __agbabi_rtc_write8(int n);
 ```
 
+Set the raw chip time and date.
+
+```c
+void __agbabi_rtc_settime(int time);
+void __agbabi_rtc_setldatetime(long long datetime);
+void __agbabi_rtc_setdatetime(int __attribute__((__vector_size__(8))) datetime);
+```
+
+These take big-endian BCD encoded values.
+
 ## POSIX library
 
 ### getcontext
@@ -310,13 +320,23 @@ Alias of `__aeabi_swapcontext`.
 int swapcontext(ucontext_t *restrict oucp, const ucontext_t *restrict ucp);
 ```
 
-### gettimeofday
-Writes the current time of day to `tv`.
+### _gettimeofday
+Writes the current date to `tv`.
 
 `tz` is unused.
 
 Returns 0 on success.
 ```c
-int _gettimeofday(struct timeval* restrict tv, void* restrict tz);
+int _gettimeofday(struct timeval* restrict tv, struct timezone* restrict tz);
 ```
 This is used internally by the C time APIs.
+
+### settimeofday
+Sets the current date to value pointed to by `tv`.
+
+`tz` is unused.
+
+Returns 0 on success.
+```c
+int settimeofday(const struct timeval* restrict tv, const struct timezone* restrict tz);
+```
