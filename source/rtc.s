@@ -190,7 +190,7 @@ __agbabi_rtc_time:
     mov     r0, #0
 
     .set i, 0
-    .rept 24
+    .rept 23
         strh    r2, [r3]
         strh    r2, [r3]
         strh    r2, [r3]
@@ -204,19 +204,19 @@ __agbabi_rtc_time:
         orr     r0, r1
 
         .set i, i + 1
-        .if i < 24
+        .if i < 23
             sub     r2, r2, #1
             lsr     r0, #1
         .endif
     .endr
 
-    lsr     r0, #8
+    lsr     r0, #9
 
     mov     r1, #1
     strh    r1, [r3]
     strh    r1, [r3]
 
-    lsl     r1, #22
+    lsl     r1, #23
     bic     r0, r1
 
     pop     {r1}
@@ -276,17 +276,21 @@ __agbabi_rtc_datetime:
         add     r2, r2, #1
         strh    r2, [r3]
 
-        ldrh    r1, [r3]
-        lsl     r1, #30
-        orr     r0, r1
-
         .set i, i + 1
+        .if i < 28
+            ldrh    r1, [r3]
+            lsl     r1, #30
+            orr     r0, r1
+
+            lsr     r0, #1
+        .endif
+
         .if i < 32
             sub     r2, r2, #1
-            lsr     r0, #1
         .endif
     .endr
 
+    lsr     r0, #4
     push    {r0}
 
     // read24
@@ -294,7 +298,7 @@ __agbabi_rtc_datetime:
     mov     r0, #0
 
     .set i, 0
-    .rept 24
+    .rept 23
         strh    r2, [r3]
         strh    r2, [r3]
         strh    r2, [r3]
@@ -308,19 +312,19 @@ __agbabi_rtc_datetime:
         orr     r0, r1
 
         .set i, i + 1
-        .if i < 24
+        .if i < 23
             sub     r2, r2, #1
             lsr     r0, #1
         .endif
     .endr
 
-    lsr     r0, #8
+    lsr     r0, #9
 
     mov     r1, #1
     strh    r1, [r3]
     strh    r1, [r3]
 
-    lsl     r1, #22
+    lsl     r1, #23
     bic     r0, r1
 
     pop     {r1, r2}
@@ -350,7 +354,7 @@ __agbabi_rtc_settime:
     lsl     r0, #1
 
     .set i, 0
-    .rept 24
+    .rept 23
         mov     r2, #2
         and     r2, r0
         add     r1, r2, #4
@@ -361,7 +365,7 @@ __agbabi_rtc_settime:
         strh    r2, [r3]
 
         .set i, i + 1
-        .if i < 24
+        .if i < 23
             lsr     r0, #1
         .endif
     .endr
@@ -416,17 +420,22 @@ __agbabi_rtc_setdatetime:
     // Set 24 bits of time (repeat the 25th bit 8 times for 32-bit alignment)
     .set i, 0
     .rept 32
-        mov     r2, #2
-        and     r2, r0
-        add     r1, r2, #4
-        add     r2, r1, #1
+        .if i < 24
+            mov     r2, #2
+            and     r2, r0
+            add     r1, r2, #4
+            add     r2, r1, #1
+        .elseif i == 24
+            mov     r1, #6
+            mov     r2, #7
+        .endif
         strh    r1, [r3]
         strh    r1, [r3]
         strh    r1, [r3]
         strh    r2, [r3]
 
         .set i, i + 1
-        .if i < 24
+        .if i < 23
             lsr     r0, #1
         .endif
     .endr
