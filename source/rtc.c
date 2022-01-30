@@ -18,8 +18,6 @@
 typedef unsigned short u16;
 typedef volatile u16 vu16;
 
-#define GPIO_PORT_READ_ENABLE ((vu16*) 0x80000c8)
-
 #define TM_YEAR(X)       (((X) >> 32) & 0xff)
 #define TM_YEAR_UNIT(X)  ((TM_YEAR(X) >> 0) & 0x0f)
 #define TM_MONTH(X)      (((X) >> 40) & 0xff)
@@ -36,8 +34,6 @@ typedef volatile u16 vu16;
 #define TM_SEC_UNIT(X)   ((TM_SEC(X) >> 0) & 0x0f)
 
 int __agbabi_rtc_init() {
-    *GPIO_PORT_READ_ENABLE = 1;
-
     int status = __agbabi_rtc_status();
     if ((status & agbagbi_rtc_POWER) || (status & agbagbi_rtc_24HOUR) == 0) {
         __agbabi_rtc_reset();
@@ -50,59 +46,45 @@ int __agbabi_rtc_init() {
 
     status = __agbabi_rtc_status();
 
-    int error;
     if (__builtin_expect(status & agbagbi_rtc_POWER, 0)) {
-        error = agbabi_rtc_EPOWER;
-        goto init_error;
+        return agbabi_rtc_EPOWER;
     }
 
     if (!__builtin_expect(status & agbagbi_rtc_24HOUR, agbagbi_rtc_24HOUR)) {
-        error = agbabi_rtc_E12HOUR;
-        goto init_error;
+        return agbabi_rtc_E12HOUR;
     }
 
     const long long datetime = __agbabi_rtc_ldatetime();
 
     if (__builtin_expect(TM_YEAR(datetime) > 0x9f || TM_YEAR_UNIT(datetime) > 9, 1)) {
-        error = agbabi_rtc_EYEAR;
-        goto init_error;
+        return agbabi_rtc_EYEAR;
     }
 
     if (__builtin_expect(TM_MONTH(datetime) == 0 || TM_MONTH(datetime) > 0x1f || TM_MONTH_UNIT(datetime) > 9, 1)) {
-        error = agbabi_rtc_EMON;
-        goto init_error;
+        return agbabi_rtc_EMON;
     }
 
     if (__builtin_expect(TM_DAY(datetime) == 0 || TM_DAY(datetime) > 0x3f || TM_DAY_UNIT(datetime) > 9, 1)) {
-        error = agbabi_rtc_EDAY;
-        goto init_error;
+        return agbabi_rtc_EDAY;
     }
 
     if (__builtin_expect((TM_WDAY(datetime) & 0xf8) || TM_WDAY_UNIT(datetime) > 6, 1)) {
-        error = agbabi_rtc_EWDAY;
-        goto init_error;
+        return agbabi_rtc_EWDAY;
     }
 
     if (__builtin_expect(TM_HOUR(datetime) > 0x2f || TM_HOUR_UNIT(datetime) > 9, 1)) {
-        error = agbabi_rtc_EHOUR;
-        goto init_error;
+        return agbabi_rtc_EHOUR;
     }
 
     if (__builtin_expect(TM_MIN(datetime) > 0x5f || TM_MIN_UNIT(datetime) > 9, 1)) {
-        error = agbabi_rtc_EMIN;
-        goto init_error;
+        return agbabi_rtc_EMIN;
     }
 
     if (__builtin_expect(TM_SEC(datetime) > 0x5f || TM_SEC_UNIT(datetime) > 9, 1)) {
-        error = agbabi_rtc_ESEC;
-        goto init_error;
+        return agbabi_rtc_ESEC;
     }
 
-    return 0;
-
-init_error:
-    *GPIO_PORT_READ_ENABLE = 0;
-    return error;
+    return agbabi_rtc_OK;
 }
 
 #ifndef NO_POSIX

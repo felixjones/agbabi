@@ -236,6 +236,10 @@ The argument `flags` of the `__agbabi_irq_uproc` procedure will contain a mask o
 
 Requires RTC chip on cartridge.
 
+**Important:**
+* `REG_GPIOCNT` (`0x80000c8`) must be set to `1` (read/write enabled) for RTC chip access.
+* Interrupts should be disabled during RTC chip access.
+
 #### Initialise RTC
 
 Initializes the RTC clock, returning a non-zero error code if initialization fails.
@@ -245,8 +249,6 @@ int __agbabi_rtc_init();
 ```
 
 `__agbabi_rtc_init` returns 0 on success.
-
-**The GPIO port will be left ENABLED on success.**
 
 #### Querying time
 
@@ -329,6 +331,9 @@ Returns 0 on success.
 ```c
 int _gettimeofday(struct timeval* restrict tv, struct timezone* restrict tz);
 ```
+`REG_GPIOCNT` must be set to `1`.    
+`REG_IME` is temporarily set to `0` during the RTC access.
+
 This is used internally by the C time APIs.
 
 ### settimeofday
@@ -340,3 +345,6 @@ Returns 0 on success.
 ```c
 int settimeofday(const struct timeval* restrict tv, const struct timezone* restrict tz);
 ```
+
+`REG_GPIOCNT` must be set to `1`.    
+`REG_IME` is temporarily set to `0` during the RTC access.
