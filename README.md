@@ -232,6 +232,70 @@ void(*__agbabi_irq_uproc)(short irqFlags);
 ```
 The argument `flags` of the `__agbabi_irq_uproc` procedure will contain a mask of the raised IRQs.
 
+### Real Time Clock
+
+Requires RTC chip on cartridge.
+
+**Important:**
+* `REG_GPIOCNT` (`0x80000c8`) must be set to `1` (read/write enabled) for RTC chip access.
+* Interrupts should be disabled during RTC chip access.
+
+#### Initialise RTC
+
+Initializes the RTC clock, returning a non-zero error code if initialization fails.
+
+```c
+int __agbabi_rtc_init();
+```
+
+`__agbabi_rtc_init` returns 0 on success.
+
+#### Querying time
+
+Retrieve the raw chip time and date.
+
+```c
+int __agbabi_rtc_time();
+long long __agbabi_rtc_ldatetime();
+int __attribute__((__vector_size__(8))) __agbabi_rtc_datetime();
+```
+
+These return big-endian BCD encoded values.
+
+`ldatetime` and `datetime` stores date in the upper 32-bits, time in the lower 32-bits.
+
+#### RTC status
+
+Returns the RTC chip status.
+
+```c
+int __agbabi_rtc_status();
+```
+
+Resets the RTC status.
+
+```c
+void __agbabi_rtc_reset();
+```
+
+#### Modifying RTC
+
+Writes 8 bits to RTC chip.
+
+```c
+void __agbabi_rtc_write8(int n);
+```
+
+Set the raw chip time and date.
+
+```c
+void __agbabi_rtc_settime(int time);
+void __agbabi_rtc_setldatetime(long long datetime);
+void __agbabi_rtc_setdatetime(int __attribute__((__vector_size__(8))) datetime);
+```
+
+These take big-endian BCD encoded values.
+
 ## POSIX library
 
 ### getcontext
@@ -257,3 +321,30 @@ Alias of `__aeabi_swapcontext`.
 ```c
 int swapcontext(ucontext_t *restrict oucp, const ucontext_t *restrict ucp);
 ```
+
+### _gettimeofday
+Writes the current date to `tv`.
+
+`tz` is unused.
+
+Returns 0 on success.
+```c
+int _gettimeofday(struct timeval* restrict tv, struct timezone* restrict tz);
+```
+`REG_GPIOCNT` must be set to `1`.    
+`REG_IME` is temporarily set to `0` during the RTC access.
+
+This is used internally by the C time APIs.
+
+### settimeofday
+Sets the current date to value pointed to by `tv`.
+
+`tz` is unused.
+
+Returns 0 on success.
+```c
+int settimeofday(const struct timeval* restrict tv, const struct timezone* restrict tz);
+```
+
+`REG_GPIOCNT` must be set to `1`.    
+`REG_IME` is temporarily set to `0` during the RTC access.
