@@ -25,6 +25,6 @@ void __agbabi_coro_make(agbabi_coro_t* coro, void* sp_top, int(*coproc)(agbabi_c
     stack -= 10; // Allocate space for storing r4-r12, lr (r12 for alignment)
     stack[9] = (unsigned int) __agbabi_coro_pop;
 
-    coro->context.arm_sp = (unsigned int) stack;
+    coro->arm_sp = (unsigned int) stack;
     coro->alive = 1; // Set alive flag (ready to start)
 }

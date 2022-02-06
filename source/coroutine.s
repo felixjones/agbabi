@@ -10,8 +10,6 @@
 ===============================================================================
 */
 
-#define AGBABI_CORO_OFFSETOF_ALIVE 4
-
     .arm
     .align 2
 
@@ -22,6 +20,7 @@ __agbabi_coro_resume:
     mov     r1, sp
 
     ldr     sp, [r0]
+    bic     sp, sp, #0x80000000
     pop     {r4-r12, lr} // r12 for alignment
     str     r1, [r0]
 
@@ -35,6 +34,9 @@ __agbabi_coro_yield:
 
     ldr     sp, [r0]
     pop     {r4-r11, lr}
+
+    // Set "alive" flag
+    orr     r2, r2, #0x80000000
     str     r2, [r0]
 
     // Move yield value into r0 and return
@@ -44,21 +46,13 @@ __agbabi_coro_yield:
     .section .iwram.__agbabi_coro_pop, "ax", %progbits
     .global __agbabi_coro_pop
 __agbabi_coro_pop:
-    ldmia   sp, {r0-r1}
-
-    // Set "alive" flag
-    mov     r2, #1
-    str     r2, [r0, #(AGBABI_CORO_OFFSETOF_ALIVE)]
+    ldr     r1, [sp, #4]
 
     mov     lr, pc
     bx      r1
     ldr     r1, [sp]
     // r0 contains return value
     // r1 points to agbabi_coro_t*
-
-    // Clear "alive" flag
-    mov     r3, #0
-    str     r3, [r1, #AGBABI_CORO_OFFSETOF_ALIVE]
 
     // Allocate space for storing r4-r12, lr
     sub     r2, sp, #40
@@ -68,6 +62,9 @@ __agbabi_coro_pop:
     // Load suspend context
     ldr     sp, [r1]
     pop     {r4-r11, lr}
+
+    // Clear "alive" flag
+    bic     r2, r2, #0x80000000
     str     r2, [r1]
 
     bx      lr

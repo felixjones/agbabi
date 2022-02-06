@@ -162,13 +162,9 @@ void __agbabi_rtc_settime(int time);
 /// \param datetime lower 32-bits = raw BCD time, upper 32-bits = raw BCD date
 void __agbabi_rtc_setldatetime(long long datetime);
 
-typedef struct agbabi_co_context_t {
-    unsigned int arm_sp;
-} agbabi_co_context_t;
-
 typedef struct agbabi_coro_t {
-    agbabi_co_context_t context;
-    int alive;
+    unsigned int arm_sp : 31;
+    unsigned int alive : 1;
 } agbabi_coro_t;
 
 /// Initialises a coro struct to call a given coroutine
