@@ -164,7 +164,7 @@ void __agbabi_rtc_setldatetime(long long datetime);
 
 typedef struct agbabi_coro_t {
     unsigned int arm_sp : 31;
-    unsigned int alive : 1;
+    unsigned int joined : 1;
 } agbabi_coro_t;
 
 /// Initialises a coro struct to call a given coroutine

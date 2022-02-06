@@ -26,5 +26,5 @@ void __agbabi_coro_make(agbabi_coro_t* coro, void* sp_top, int(*coproc)(agbabi_c
     stack[9] = (unsigned int) __agbabi_coro_pop;
 
     coro->arm_sp = (unsigned int) stack;
-    coro->alive = 1; // Set alive flag (ready to start)
+    coro->joined = 0; // Clear joined flag (ready to start)
 }

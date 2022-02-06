@@ -34,9 +34,6 @@ __agbabi_coro_yield:
 
     ldr     sp, [r0]
     pop     {r4-r11, lr}
-
-    // Set "alive" flag
-    orr     r2, r2, #0x80000000
     str     r2, [r0]
 
     // Move yield value into r0 and return
@@ -63,8 +60,8 @@ __agbabi_coro_pop:
     ldr     sp, [r1]
     pop     {r4-r11, lr}
 
-    // Clear "alive" flag
-    bic     r2, r2, #0x80000000
+    // Set "joined" flag
+    orr     r2, r2, #0x80000000
     str     r2, [r1]
 
     bx      lr
