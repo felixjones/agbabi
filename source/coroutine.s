@@ -30,8 +30,6 @@
     .section .iwram.__agbabi_coro_resume, "ax", %progbits
     .global __agbabi_coro_resume
 __agbabi_coro_resume:
-    push    {lr}
-
     // Swap contexts
     mov     r1, r4
     mov     r2, r5
@@ -51,17 +49,12 @@ __agbabi_coro_resume:
     ldmia   r0, {r10-r11, sp}
     stmia   r0!, {r1-r3}
 
-    ldr     r1, =.Lcoro_yielded
+    mov     r1, lr
     ldr     lr, [r0]
     str     r1, [r0]
 
     sub     r0, #(AGBABI_CO_OFFSETOF_ARM_LR)
     // r0 should still contain agbabi_coro_t*
-    bx      lr
-
-.Lcoro_yielded:
-    // r0 should contain yield value
-    pop     {lr}
     bx      lr
 
     .section .iwram.__agbabi_coro_yield, "ax", %progbits
