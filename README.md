@@ -296,6 +296,44 @@ void __agbabi_rtc_setdatetime(int __attribute__((__vector_size__(8))) datetime);
 
 These take big-endian BCD encoded values.
 
+### Coroutines
+Basic implementation of stackful coroutines.
+
+The coroutine object type is declared as:
+```c
+typedef struct agbabi_coro_t {
+    unsigned int arm_sp : 31;
+    unsigned int joined : 1;
+} agbabi_coro_t;
+```
+The `joined` bit can be used for testing if a coroutine has returned from execution.
+
+#### make
+
+Initializes the coroutine object pointed to by `coro`. `sp_top` is the **top** of the user-allocated stack space for the coroutine.    
+**At least 48 bytes must be allocated for the coroutine stack.**
+```c
+void __agbabi_coro_make(agbabi_coro_t *restrict coro, void *restrict sp_top, int(*coproc)(agbabi_coro_t*));
+```
+
+#### resume
+
+Starts the given coroutine if it has not yet started.    
+Resumes the given coroutine if it has yielded.    
+Restarts the given coroutine if it has joined.
+```c
+int __agbabi_coro_resume(agbabi_coro_t* coro);
+```
+The return value is the value yielded or returned by the coroutine.
+
+#### yield
+
+From coroutine `coro`, yields the given `value` back to the caller.
+```c
+void __agbabi_coro_yield(agbabi_coro_t* coro, int value);
+```
+When the caller next resumes coroutine `coro`, it will behave as if this function has just returned.
+
 ## POSIX library
 
 ### getcontext
@@ -329,7 +367,7 @@ Writes the current date to `tv`.
 
 Returns 0 on success.
 ```c
-int _gettimeofday(struct timeval* restrict tv, struct timezone* restrict tz);
+int _gettimeofday(struct timeval *restrict tv, struct timezone *restrict tz);
 ```
 `REG_GPIOCNT` must be set to `1`.    
 `REG_IME` is temporarily set to `0` during the RTC access.
@@ -343,7 +381,7 @@ Sets the current date to value pointed to by `tv`.
 
 Returns 0 on success.
 ```c
-int settimeofday(const struct timeval* restrict tv, const struct timezone* restrict tz);
+int settimeofday(const struct timeval *restrict tv, const struct timezone *restrict tz);
 ```
 
 `REG_GPIOCNT` must be set to `1`.    

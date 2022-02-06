@@ -167,14 +167,13 @@ typedef struct agbabi_coro_t {
     unsigned int joined : 1;
 } agbabi_coro_t;
 
-/// Initialises a coro struct to call a given coroutine
+/// Initializes a coro struct to call a given coroutine
 /// \param coro pointer to coro struct to initialize
 /// \param sp_top the TOP of the stack for this coroutine (stack grows down!)
 /// \param coproc procedure to call as a coroutine
-void __agbabi_coro_make(agbabi_coro_t* coro, void* sp_top, int(*coproc)(agbabi_coro_t*));
+void __agbabi_coro_make(agbabi_coro_t* __restrict__ coro, void* __restrict__ sp_top, int(*coproc)(agbabi_coro_t*));
 
 /// Starts/resumes a given coroutine
-/// When coroutine returns, the coro->alive flag is set to 0
 /// \param coro coroutine to start/resumt
 /// \return integer value from coroutine
 int __agbabi_coro_resume(agbabi_coro_t* coro);

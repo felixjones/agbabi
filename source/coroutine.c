@@ -14,7 +14,7 @@
 
 void __agbabi_coro_pop();
 
-void __agbabi_coro_make(agbabi_coro_t* coro, void* sp_top, int(*coproc)(agbabi_coro_t*)) {
+void __agbabi_coro_make(agbabi_coro_t* __restrict__ coro, void* __restrict__ sp_top, int(*coproc)(agbabi_coro_t*)) {
     // AAPCS wants stack to be aligned to 8 bytes
     unsigned int alignedTop = ((unsigned int) sp_top) & ~0x7;
 
