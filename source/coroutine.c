@@ -19,9 +19,9 @@ void __agbabi_coro_make(agbabi_coro_t* coro, void* sp_top, int(*coproc)(agbabi_c
     stack -= 2; // Allocate space on stack for pointer to self, and entry procedure
     stack[0] = (unsigned int) coro;
     stack[1] = (unsigned int) coproc;
-    stack -= 8; // Allocate space for storing r4-r11
+    stack -= 9; // Allocate space for storing r4-r11, lr
+    stack[8] = (unsigned int) __agbabi_coro_pop;
 
     coro->context.arm_sp = (unsigned int) stack;
-    coro->context.arm_lr = (unsigned int) __agbabi_coro_pop;
     coro->alive = 1; // Set alive flag (ready to start)
 }
