@@ -163,14 +163,6 @@ void __agbabi_rtc_settime(int time);
 void __agbabi_rtc_setldatetime(long long datetime);
 
 typedef struct agbabi_co_context_t {
-    unsigned int arm_r4;
-    unsigned int arm_r5;
-    unsigned int arm_r6;
-    unsigned int arm_r7;
-    unsigned int arm_r8;
-    unsigned int arm_r9;
-    unsigned int arm_r10;
-    unsigned int arm_r11;
     unsigned int arm_sp;
     unsigned int arm_lr;
 } agbabi_co_context_t;
