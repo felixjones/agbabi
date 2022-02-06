@@ -13,6 +13,7 @@ project(agbabi ASM C)
 
 add_library(agbabi STATIC
     source/context.s
+    source/coroutine.s
     source/idiv.s
     source/irq.s
     source/ldiv.s
@@ -27,6 +28,7 @@ add_library(agbabi STATIC
     source/uldiv.s
     source/uluidiv.s
 
+    source/coroutine.c
     source/makecontext.c
     source/rtc.c
 )
