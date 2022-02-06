@@ -15,12 +15,15 @@
 void __agbabi_coro_pop();
 
 void __agbabi_coro_make(agbabi_coro_t* coro, void* sp_top, int(*coproc)(agbabi_coro_t*)) {
-    unsigned int* stack = (unsigned int*) sp_top;
+    // AAPCS wants stack to be aligned to 8 bytes
+    unsigned int alignedTop = ((unsigned int) sp_top) & ~0x7;
+
+    unsigned int* stack = (unsigned int*) alignedTop;
     stack -= 2; // Allocate space on stack for pointer to self, and entry procedure
     stack[0] = (unsigned int) coro;
     stack[1] = (unsigned int) coproc;
-    stack -= 9; // Allocate space for storing r4-r11, lr
-    stack[8] = (unsigned int) __agbabi_coro_pop;
+    stack -= 10; // Allocate space for storing r4-r12, lr (r12 for alignment)
+    stack[9] = (unsigned int) __agbabi_coro_pop;
 
     coro->context.arm_sp = (unsigned int) stack;
     coro->alive = 1; // Set alive flag (ready to start)

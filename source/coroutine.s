@@ -22,7 +22,7 @@ __agbabi_coro_resume:
     mov     r1, sp
 
     ldr     sp, [r0]
-    pop     {r4-r11, lr}
+    pop     {r4-r12, lr} // r12 for alignment
     str     r1, [r0]
 
     bx      lr
@@ -30,7 +30,7 @@ __agbabi_coro_resume:
     .section .iwram.__agbabi_coro_yield, "ax", %progbits
     .global __agbabi_coro_yield
 __agbabi_coro_yield:
-    push    {r4-r11, lr}
+    push    {r4-r12, lr} // r12 for alignment
     mov     r2, sp
 
     ldr     sp, [r0]
@@ -60,10 +60,10 @@ __agbabi_coro_pop:
     mov     r3, #0
     str     r3, [r1, #AGBABI_CORO_OFFSETOF_ALIVE]
 
-    // Allocate space for storing r4-r11, lr
-    sub     r2, sp, #36
+    // Allocate space for storing r4-r12, lr
+    sub     r2, sp, #40
     ldr     r3, =__agbabi_coro_pop
-    str     r3, [r2, #32] // Reset lr to pop
+    str     r3, [r2, #36] // Next resume will call __agbabi_coro_pop
 
     // Load suspend context
     ldr     sp, [r1]
