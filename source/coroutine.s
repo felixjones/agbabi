@@ -21,9 +21,8 @@
 #define AGBABI_CO_OFFSETOF_ARM_SP 32
 #define AGBABI_CO_OFFSETOF_ARM_LR 36
 
-#define AGBABI_CORO_OFFSETOF_SUSPEND 0
-#define AGBABI_CORO_OFFSETOF_CONTEXT 40
-#define AGBABI_CORO_OFFSETOF_ALIVE 80
+#define AGBABI_CORO_OFFSETOF_CONTEXT 0
+#define AGBABI_CORO_OFFSETOF_ALIVE 40
 
     .arm
     .align 2
@@ -32,15 +31,31 @@
     .global __agbabi_coro_resume
 __agbabi_coro_resume:
     push    {lr}
-    ldr     lr, =.Lcoro_yielded
 
-    // Suspend current context
-    mov     r1, r0
-    stmia   r1!, {r4-r11, sp, lr}
+    // Swap contexts
+    mov     r1, r4
+    mov     r2, r5
+    mov     r3, r6
+    ldmia   r0, {r4-r6}
+    stmia   r0!, {r1-r3}
 
-    // Load coro context
-    ldmia   r1, {r4-r11, sp, lr}
+    mov     r1, r7
+    mov     r2, r8
+    mov     r3, r9
+    ldmia   r0, {r7-r9}
+    stmia   r0!, {r1-r3}
 
+    mov     r1, r10
+    mov     r2, r11
+    mov     r3, sp
+    ldmia   r0, {r10-r11, sp}
+    stmia   r0!, {r1-r3}
+
+    ldr     r1, =.Lcoro_yielded
+    ldr     lr, [r0]
+    str     r1, [r0]
+
+    sub     r0, #(AGBABI_CO_OFFSETOF_ARM_LR)
     // r0 should still contain agbabi_coro_t*
     bx      lr
 
@@ -52,12 +67,35 @@ __agbabi_coro_resume:
     .section .iwram.__agbabi_coro_yield, "ax", %progbits
     .global __agbabi_coro_yield
 __agbabi_coro_yield:
-    // Suspend current context
-    add     r2, r0, #(AGBABI_CORO_OFFSETOF_CONTEXT)
-    stmia   r2, {r4-r11, sp, lr}
+    // Push yield value
+    push    {r1}
 
-    // Load suspend context
-    ldmia   r0, {r4-r11, sp, lr}
+    // Swap contexts
+    mov     r1, r4
+    mov     r2, r5
+    mov     r3, r6
+    ldmia   r0, {r4-r6}
+    stmia   r0!, {r1-r3}
+
+    mov     r1, r7
+    mov     r2, r8
+    mov     r3, r9
+    ldmia   r0, {r7-r9}
+    stmia   r0!, {r1-r3}
+
+    // Pop yield value
+    pop    {r1}
+
+    mov     r2, r10
+    mov     r3, r11
+    ldmia   r0, {r10-r11}
+    stmia   r0!, {r2-r3}
+
+    // Swap stack and link
+    mov     r2, sp
+    mov     r3, lr
+    ldmia   r0, {sp, lr}
+    stmia   r0!, {r2-r3}
 
     // Move yield value into r0 and return
     mov     r0, r1
@@ -84,7 +122,7 @@ __agbabi_coro_pop:
     mov     r2, sp
 
     // Load suspend context
-    ldmia   r1!, {r4-r11, sp, lr}
+    ldmia   r1, {r4-r11, sp, lr}
 
     // Write sp into context sp
     str     r2, [r1, #AGBABI_CO_OFFSETOF_ARM_SP]

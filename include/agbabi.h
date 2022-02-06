@@ -176,7 +176,6 @@ typedef struct agbabi_co_context_t {
 } agbabi_co_context_t;
 
 typedef struct agbabi_coro_t {
-    agbabi_co_context_t suspend;
     agbabi_co_context_t context;
     int alive;
 } agbabi_coro_t;
