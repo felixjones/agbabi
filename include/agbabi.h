@@ -162,6 +162,27 @@ void __agbabi_rtc_settime(int time);
 /// \param datetime lower 32-bits = raw BCD time, upper 32-bits = raw BCD date
 void __agbabi_rtc_setldatetime(long long datetime);
 
+typedef struct agbabi_coro_t {
+    unsigned int arm_sp : 31;
+    unsigned int joined : 1;
+} agbabi_coro_t;
+
+/// Initializes a coro struct to call a given coroutine
+/// \param coro pointer to coro struct to initialize
+/// \param sp_top the TOP of the stack for this coroutine (stack grows down!)
+/// \param coproc procedure to call as a coroutine
+void __agbabi_coro_make(agbabi_coro_t* __restrict__ coro, void* __restrict__ sp_top, int(*coproc)(agbabi_coro_t*));
+
+/// Starts/resumes a given coroutine
+/// \param coro coroutine to start/resumt
+/// \return integer value from coroutine
+int __agbabi_coro_resume(agbabi_coro_t* coro);
+
+/// Yields a given value of a coroutine back to caller
+/// \param coro coroutine that is yielding
+/// \param value returned to caller
+void __agbabi_coro_yield(agbabi_coro_t* coro, int value);
+
 #if defined __has_attribute
 #if __has_attribute(__vector_size__)
 

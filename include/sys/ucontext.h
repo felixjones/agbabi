@@ -55,18 +55,18 @@ typedef struct ucontext_t {
 /// Alias of __agbabi_getcontext
 /// \param ucp Pointer to context structure
 /// \return 0
-int getcontext(ucontext_t *ucp);
+int getcontext(ucontext_t* ucp);
 
 /// Alias of __agbabi_setcontext
 /// \param ucp Pointer to context structure
 /// \return Does not return
-int setcontext(const ucontext_t *ucp) __attribute__((noreturn));
+int setcontext(const ucontext_t* ucp) __attribute__((noreturn));
 
 /// Alias of __agbabi_swapcontext
 /// \param oucp Output address for current context
 /// \param ucp Context to swap to
 /// \return Although technically this does not return, it will appear to return 0 when switching to oucp
-int swapcontext(ucontext_t *__restrict__ oucp, const ucontext_t *__restrict__ ucp);
+int swapcontext(ucontext_t* __restrict__ oucp, const ucontext_t* __restrict__ ucp);
 
 /// Alias of __agbabi_makecontext
 /// \param ucp Pointer to context structure

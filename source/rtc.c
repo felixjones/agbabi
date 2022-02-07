@@ -2,7 +2,7 @@
 ===============================================================================
 
  POSIX:
-    _gettimeofday
+    _gettimeofday, settimeofday
 
  Support:
     __agbabi_rtc_init
