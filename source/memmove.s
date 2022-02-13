@@ -47,7 +47,9 @@ __agbabi_memmove2:
 memmove:
     push    {r0, lr}
     cmp     r0, r1
+    adr     lr, .Lmemmove_return
     bgt     __agbabi_rmemcpy
     b       __aeabi_memcpy
+.Lmemmove_return:
     pop     {r0, lr}
     bx      lr
