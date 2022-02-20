@@ -19,10 +19,14 @@ extern "C" {
 
 #include <stddef.h>
 
+#if defined(__DEVKITARM__)
+#   include <sys/signal.h>
+#else
 typedef struct stack_t {
     void* ss_sp;
     size_t ss_size;
 } stack_t;
+#endif
 
 typedef struct mcontext_t {
     unsigned int arm_r0;
@@ -80,7 +84,11 @@ void makecontext(ucontext_t* ucp, void(*func)(), int argc, ...);
 #endif // ifndef __ASSEMBLER__
 
 #define STACK_OFFSETOF_SS_SP 0
-#define STACK_OFFSETOF_SS_SIZE 4
+#if defined(__DEVKITARM__)
+#   define STACK_OFFSETOF_SS_SIZE 8
+#else
+#   define STACK_OFFSETOF_SS_SIZE 4
+#endif
 
 #define MCONTEXT_OFFSETOF_ARM_R0 0
 #define MCONTEXT_OFFSETOF_ARM_R1 4
@@ -102,7 +110,11 @@ void makecontext(ucontext_t* ucp, void(*func)(), int argc, ...);
 
 #define UCONTEXT_OFFSETOF_UC_LINK 0
 #define UCONTEXT_OFFSETOF_UC_STACK 4
-#define UCONTEXT_OFFSETOF_UC_MCONTEXT 12
+#if defined(__DEVKITARM__)
+#   define UCONTEXT_OFFSETOF_UC_MCONTEXT 16
+#else
+#   define UCONTEXT_OFFSETOF_UC_MCONTEXT 12
+#endif
 
 #if defined( __cplusplus )
 } // extern "C"
