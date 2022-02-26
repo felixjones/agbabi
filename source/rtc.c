@@ -128,6 +128,12 @@ int _gettimeofday(struct timeval* __restrict__ tv, __attribute__((unused)) struc
     return 0;
 }
 
+#if defined(__DEVKITARM__)
+int _gettimeofday_r(__attribute__((unused)) void* __restrict__ reent, struct timeval* __restrict__ tv, __attribute__((unused)) struct timezone* tz) {
+    return _gettimeofday(tv, tz);
+}
+#endif
+
 int settimeofday(const struct timeval* __restrict__ tv, __attribute__((unused)) const struct timezone* __restrict__ tz) {
     const struct tm* tmptr = gmtime(&tv->tv_sec);
 

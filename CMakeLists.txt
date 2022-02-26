@@ -38,3 +38,7 @@ target_compile_options(agbabi PRIVATE
     $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
     $<$<COMPILE_LANGUAGE:C>:-mabi=aapcs -march=armv4t -mcpu=arm7tdmi -mthumb -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter>
 )
+
+if(USE_DEVKITARM)
+    target_compile_definitions(agbabi PRIVATE __DEVKITARM__)
+endif()
