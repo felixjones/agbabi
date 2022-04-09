@@ -204,14 +204,14 @@ unsigned long long __attribute__((__vector_size__(16))) __agbabi_unsafe_uldivmod
 /// \param numerator
 /// \param denominator
 /// \return [quotient, remainder]
-unsigned long long __attribute__((__vector_size__(16))) __agbabi_uluidivmod(unsigned long long numerator, int denominator);
+unsigned long long __attribute__((__vector_size__(16))) __agbabi_uluidivmod(unsigned long long numerator, unsigned int denominator);
 
 /// Unsigned 64-bit / 32-bit -> 64-bit division and modulo
 /// Check for divide by zero is not performed
 /// \param numerator
 /// \param denominator
 /// \return [quotient, remainder]
-unsigned long long __attribute__((__vector_size__(16))) __agbabi_unsafe_uluidivmod(unsigned long long numerator, int denominator);
+unsigned long long __attribute__((__vector_size__(16))) __agbabi_unsafe_uluidivmod(unsigned long long numerator, unsigned int denominator);
 
 /// Get the current, raw date & time from the RTC
 /// \return [raw time in BCD, raw date in BCD]
