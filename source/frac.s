@@ -46,6 +46,7 @@ __agbabi_frac10:
     pop     {r4-r7, r11, lr}
     bx      lr
 
+    // Compiled from Clang with _BitInt
     .section .iwram.__agbabi_bcd128, "ax", %progbits
     .global __agbabi_bcd128
 __agbabi_bcd128:
@@ -65,7 +66,7 @@ __agbabi_bcd128:
     rsb     r11, r4, #128
     rsb     r8, r4, #64
     rsbs    r12, r4, #96
-    str     r4, [sp]                        @ 4-byte Spill
+    str     r4, [sp]
     rsb     lr, r11, #32
     rsb     r9, r11, #64
     lsr     r6, r2, lr
@@ -117,16 +118,16 @@ __agbabi_bcd128:
     mov     r12, #0x60000000
     movhs   lr, r7
 
-.LBB0_2:                                @ =>This Loop Header: Depth=1
-    str     lr, [sp, #4]                    @ 4-byte Spill
+.LBB0_2:
+    str     lr, [sp, #4]
     lsr     r9, r6, #31
     mov     lr, #0
-    str     r7, [sp, #8]                    @ 4-byte Spill
-    str     r3, [sp, #12]                   @ 4-byte Spill
-    str     r8, [sp, #16]                   @ 4-byte Spill
-    str     r6, [sp, #20]                   @ 4-byte Spill
+    str     r7, [sp, #8]
+    str     r3, [sp, #12]
+    str     r8, [sp, #16]
+    str     r6, [sp, #20]
 
-.Lbcd128_loop_words:                                @   Parent Loop BB0_2 Depth=1
+.Lbcd128_loop_words:
     ldr     r8, [r0, lr, lsl #2]
     and     r7, r9, #0x00000001
     ldr     r2, .LCPI0_0
@@ -190,19 +191,19 @@ __agbabi_bcd128:
     cmp     lr, #4
     bne     .Lbcd128_loop_words
 
-    ldr     r1, [sp, #4]                    @ 4-byte Reload
-    ldr     r3, [sp, #12]                   @ 4-byte Reload
-    ldr     r2, [sp, #16]                   @ 4-byte Reload
-    ldr     r7, [sp, #8]                    @ 4-byte Reload
+    ldr     r1, [sp, #4]
+    ldr     r3, [sp, #12]
+    ldr     r2, [sp, #16]
+    ldr     r7, [sp, #8]
     lsl     r6, r1, #1
     add     r7, r7, #1
     orr     lr, r6, r3, lsr #31
     lsl     r6, r2, #1
     lsl     r3, r3, #1
     orr     r8, r6, r1, lsr #31
-    ldr     r1, [sp, #20]                   @ 4-byte Reload
+    ldr     r1, [sp, #20]
     lsl     r6, r1, #1
-    ldr     r1, [sp]                        @ 4-byte Reload
+    ldr     r1, [sp]
     orr     r6, r6, r2, lsr #31
     cmp     r7, r1
     bne     .LBB0_2
