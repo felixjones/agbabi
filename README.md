@@ -334,6 +334,34 @@ void __agbabi_coro_yield(agbabi_coro_t* coro, int value);
 ```
 When the caller next resumes coroutine `coro`, it will behave as if this function has just returned.
 
+### Fixed-point printing
+
+#### Converting to decimal
+
+Converts the fractional portion of a fixed-point number to a 128-bit decimal representation.
+```c
+unsigned int __attribute__((__vector_size__(16))) __agbabi_frac10(unsigned int frac, unsigned int precision);
+```
+The upper (integer) portion of the fixed point value must be cleared.    
+Up to 32-bits of precision is supported, for a maximum of 32 digits of decimal precision.
+
+#### Converting to BCD
+
+Converts a given 128-bit integer to BCD.
+```c
+unsigned int __attribute__((__vector_size__(16))) __agbabi_bcd128(unsigned int __attribute__((__vector_size__(16))) x, unsigned int precision);
+```
+Precision is used to limit how many digits are processed for BCD.
+
+#### Printing BCD encoded fixed point fraction
+
+Writes a given 128-bit BCD encoded fraction into ASCII string (null-terminated).
+```c
+char* __agbabi_frac_bcd128_tostr(char* str, unsigned int precision, unsigned int __attribute__((__vector_size__(16))) frac);
+```
+The precision is how many BCD digits to read and convert, not including the null byte.    
+Returns a pointer to the end of the written digits, which is a null byte.
+
 ## POSIX library
 
 ### getcontext

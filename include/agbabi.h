@@ -221,6 +221,25 @@ int __attribute__((__vector_size__(8))) __agbabi_rtc_datetime();
 /// \param datetime [raw BCD time, raw BCD date]
 void __agbabi_rtc_setdatetime(int __attribute__((__vector_size__(8))) datetime);
 
+/// Converts fraction to decimal value
+/// \param frac binary fraction up to 32-bits. The integer portion must be clear.
+/// \param precision Exponent of fraction (eg: 16 for 16.16 fixed point, 29 for 3.29 fixed point)
+/// \return 128-bit integer of the decimal representation of frac up to 32 digits
+unsigned int __attribute__((__vector_size__(16))) __agbabi_frac10(unsigned int frac, unsigned int precision);
+
+/// Converts 128-bit integer to up to 32 digits of BCD
+/// \param x 128-bit integer
+/// \param precision Length of x in decimal digits
+/// \return 128-bit BCD encoded representation of x
+unsigned int __attribute__((__vector_size__(16))) __agbabi_bcd128(unsigned int __attribute__((__vector_size__(16))) x, unsigned int precision);
+
+/// Converts a 128-bit BCD encoded fraction to a null-terminated string
+/// \param str A pointer to an array long enough to store precision + 1 ASCII characters
+/// \param precision The decimal precision of frac, and number of digits to write to str (not including null)
+/// \param frac 128-bit BCD encoded decimal fraction in little-endian order
+/// \return Pointer to the null-terminator written at the end of the string
+char* __agbabi_frac_bcd128_tostr(char* str, unsigned int precision, unsigned int __attribute__((__vector_size__(16))) frac);
+
 #endif
 #endif
 
