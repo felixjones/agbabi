@@ -345,6 +345,12 @@ unsigned int __attribute__((__vector_size__(16))) __agbabi_frac10(unsigned int f
 The upper (integer) portion of the fixed point value must be cleared.    
 Up to 32-bits of precision is supported, for a maximum of 32 digits of decimal precision.
 
+Multiplies x by a power of two with logical shift to the left. The `mul128_2` variant implements a multiply-by-two with logical shift left by 1.
+```c
+unsigned int __attribute__((__vector_size__(16))) __agbabi_lsl128(unsigned int __attribute__((__vector_size__(16))) x, unsigned int shift);
+unsigned int __attribute__((__vector_size__(16))) __agbabi_mul128_2(unsigned int __attribute__((__vector_size__(16))) x);
+```
+
 #### Converting to BCD
 
 Converts a given 128-bit integer to BCD.

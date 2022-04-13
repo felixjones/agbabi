@@ -240,6 +240,17 @@ unsigned int __attribute__((__vector_size__(16))) __agbabi_bcd128(unsigned int _
 /// \return Pointer to the null-terminator written at the end of the string
 char* __agbabi_frac_bcd128_tostr(char* str, unsigned int precision, unsigned int __attribute__((__vector_size__(16))) frac);
 
+/// 128-bit logical shift left
+/// \param x 128-bit integer
+/// \param shift How many digits to shift the contents of x left by
+/// \return 128-bit value shifted left
+unsigned int __attribute__((__vector_size__(16))) __agbabi_lsl128(unsigned int __attribute__((__vector_size__(16))) x, unsigned int shift);
+
+/// Multiplies 128-bit integer x by 2
+/// \param x 128-bit integer
+/// \return x multiplied by 2
+unsigned int __attribute__((__vector_size__(16))) __agbabi_mul128_2(unsigned int __attribute__((__vector_size__(16))) x);
+
 #endif
 #endif
 
