@@ -183,6 +183,20 @@ int __agbabi_coro_resume(agbabi_coro_t* coro);
 /// \param value returned to caller
 void __agbabi_coro_yield(agbabi_coro_t* coro, int value);
 
+/// Converts an unsigned fixed-point number to a null-terminated string
+/// \param value Unsigned fixed-point number
+/// \param str A pointer to an array long enough to store up to 34 ASCII characters (including decimal point, and null terminator)
+/// \param precision The fixed-point exponent (eg: 16 for 16.16 fixed point, 29 for 3.29 fixed-point)
+/// \return Pointer to the null-terminator written at the end of the string
+char* __agbabi_ufixed_tostr(unsigned int value, char* str, unsigned int precision);
+
+/// Converts a signed fixed-point number to a null-terminated string
+/// \param value Signed fixed-point number
+/// \param str A pointer to an array long enough to store up to 35 ASCII characters (including possible sign, decimal point, and null terminator)
+/// \param precision The fixed-point exponent (eg: 16 for 15.16 fixed point, 29 for 2.29 fixed-point)
+/// \return Pointer to the null-terminator written at the end of the string
+char* __agbabi_fixed_tostr(int value, char* str, unsigned int precision);
+
 #if defined __has_attribute
 #if __has_attribute(__vector_size__)
 
@@ -223,7 +237,7 @@ void __agbabi_rtc_setdatetime(int __attribute__((__vector_size__(8))) datetime);
 
 /// Converts fraction to decimal value
 /// \param frac binary fraction up to 32-bits. The integer portion must be clear.
-/// \param precision Exponent of fraction (eg: 16 for 16.16 fixed point, 29 for 3.29 fixed point)
+/// \param precision Exponent of fraction (eg: 16 for 16.16 fixed-point, 29 for 3.29 fixed-point)
 /// \return 128-bit integer of the decimal representation of frac up to 32 digits
 unsigned int __attribute__((__vector_size__(16))) __agbabi_frac10(unsigned int frac, unsigned int precision);
 

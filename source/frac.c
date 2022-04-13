@@ -24,6 +24,12 @@ char* __agbabi_frac_bcd128_tostr(char* str, unsigned int precision, unsigned int
         }
     }
 
+    if (zeroTail == precision) {
+        *str++ = '0';
+        *str = 0;
+        return str;
+    }
+
     --precision;
     while (words--) {
         for (limit = (words * 8); precision >= limit; --precision) {
@@ -147,4 +153,47 @@ unsigned int __attribute__((__vector_size__(16))) __agbabi_bcd128(unsigned int _
     }
 
     return b;
+}
+
+char* __agbabi_ufixed_tostr(unsigned int value, char* str, unsigned int precision) {
+    typedef unsigned int __attribute__((__vector_size__(16))) uvec4;
+    uvec4 __agbabi_frac10(unsigned int frac, unsigned int precision);
+
+    uvec4 bcd = __agbabi_bcd128((uvec4) {value >> precision, 0, 0, 0}, 32 - precision);
+
+    unsigned int begin = 32;
+    while (begin--) {
+        const unsigned int word = begin / 8u;
+        const unsigned int nibble = (begin % 8u) * 4;
+        if (bcd[word] & (0xf << nibble)) {
+            break;
+        }
+    }
+
+    if (++begin == 0) {
+        ++begin;
+    }
+
+    while (begin--) {
+        const unsigned int word = begin / 8u;
+        const unsigned int nibble = (begin % 8u) * 4;
+
+        const unsigned int c = (bcd[word] >> nibble) & 0xf;
+        *str++ = '0' + c;
+    }
+
+    *str++ = '.';
+
+    bcd = __agbabi_frac10(value & ((1u << precision) - 1u), precision);
+    bcd = __agbabi_bcd128(bcd, precision);
+
+    return __agbabi_frac_bcd128_tostr(str, precision, bcd);
+}
+
+char* __agbabi_fixed_tostr(int value, char* str, unsigned int precision) {
+    if (value < 0) {
+        *str++ = '-';
+        value = -value;
+    }
+    return __agbabi_ufixed_tostr(value, str, precision);
 }

@@ -336,6 +336,16 @@ When the caller next resumes coroutine `coro`, it will behave as if this functio
 
 ### Fixed-point printing
 
+#### Priting fixed-point numbers
+
+Converts a given fixed point value to ASCII string representation.
+```c
+char* __agbabi_ufixed_tostr(unsigned int value, char* str, unsigned int precision);
+char* __agbabi_fixed_tostr(int value, char* str, unsigned int precision);
+```
+The precision is the exponent, or fractional places, of the number.    
+Returns a pointer to the last written null terminator.
+
 #### Converting to decimal
 
 Converts the fractional portion of a fixed-point number to a 128-bit decimal representation.
