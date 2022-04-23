@@ -71,21 +71,20 @@ __agbabi_setcontext:
     ldr     sp, [r0, #(MCONTEXT_OFFSETOF_ARM_SP - MCONTEXT_OFFSETOF_ARM_R3)]
     ldr     lr, [r0, #(MCONTEXT_OFFSETOF_ARM_LR - MCONTEXT_OFFSETOF_ARM_R3)]
 
-    // Enter f_IRQ mode (IRQ still disabled)
-    mov     r1, #0x91
-    msr     cpsr, r1
+    // Enter undef mode (IRQ still disabled)
+    msr     cpsr, #0x9b
 
-    // Restore cpsr into f_irq spsr
+    // Restore cpsr into undef spsr
     msr     spsr, r2
 
-    // Restore pc into f_irq lr
+    // Restore pc into undef lr
     ldr     lr, [r0, #(MCONTEXT_OFFSETOF_ARM_PC - MCONTEXT_OFFSETOF_ARM_R3)]
 
     // Restore r0-r2
     sub     r0, r0, #(MCONTEXT_OFFSETOF_ARM_R3 - MCONTEXT_OFFSETOF_ARM_R0)
     ldmia   r0, {r0-r2}
 
-    // pc = f_irq lr, cpsr = f_irq spsr
+    // pc = undef lr, cpsr = undef spsr
     movs    pc, lr
 
     .section .iwram.__agbabi_swapcontext, "ax", %progbits
