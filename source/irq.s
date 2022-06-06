@@ -43,7 +43,7 @@ __agbabi_irq_empty:
 __agbabi_irq_user:
     mov     r1, #REG_BASE
 
-    // r1 = REG_IE & REG_IF, r0 = &REG_IE_IF
+    // r0 = REG_IE & REG_IF, r1 = &REG_IE_IF
     ldr     r0, [r1, #(REG_IE_IF - REG_BASE)]!
     and     r0, r0, r0, lsr #16
 
