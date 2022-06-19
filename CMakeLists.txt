@@ -12,11 +12,13 @@ cmake_minimum_required(VERSION 3.0)
 project(agbabi ASM C)
 
 add_library(agbabi STATIC
+    source/atan2.s
     source/context.s
     source/coroutine.s
     source/frac.s
     source/idiv.s
     source/irq.s
+    source/sqrt.s
     source/ldiv.s
     source/lmul.s
     source/memcpy.s
