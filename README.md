@@ -378,6 +378,24 @@ char* __agbabi_frac_bcd128_tostr(char* str, unsigned int precision, unsigned int
 The precision is how many BCD digits to read and convert, not including the null byte.    
 Returns a pointer to the end of the written digits, which is a null byte.
 
+### Square Root
+
+Calculates the integer square root of x. Optimized version of BIOS Sqrt.
+```c
+int __agbabi_sqrt(unsigned int x);
+```
+The return value is within a 16-bit unsigned integer.
+
+### Arc Tangent
+
+Two-argument Arc Tangent function. Optimized version of BIOS ArcTan2.
+
+Note the order of the arguments.
+```c
+int __agbabi_atan2(int x, int y);
+```
+Returns 16-bit binary angle measurement pointing towards x, y.
+
 ## POSIX library
 
 ### getcontext
