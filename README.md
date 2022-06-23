@@ -2,7 +2,7 @@
 
 GBA optimized library functions for common operations.
 
-Includes implementations for various [aeabi functions](https://developer.arm.com/documentation/ihi0043/e/?lang=en#the-standard-compiler-helper-function-library).
+Includes implementations for various [aeabi functions](https://github.com/ARM-software/abi-aa/blob/main/rtabi32/rtabi32.rst).
 
 ## C standard library
 
