@@ -33,7 +33,7 @@ __aeabi_memset:
 
 .LskipShifts:
     mov     r3, #0
-    cmp     r2, #2
+    cmp     r1, #2
     // JoaoBapt carry & sign bit test
     rsbgt   r3, r0, #4
     movs    r3, r3, lsl #31
