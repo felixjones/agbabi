@@ -146,14 +146,21 @@ Used by `__aeabi_memcpy` for cases where either `dest` or `src` are half-aligned
 ```c
 void __agbabi_memcpy2(void *restrict dest, const void *restrict src, size_t n);
 ```
-`__agbabi_memcpy2` assumes that both of its arguments are 2-byte aligned. This is ideal for VRAM
+`__agbabi_memcpy2` assumes that both of its arguments are 2-byte aligned. This is ideal for VRAM.
+
+#### 8-bit memcpy
+Used by `__aeabi_memcpy` for cases where either `dest` or `src` are unaligned.
+```c
+void __agbabi_memcpy1(void *restrict dest, const void *restrict src, size_t n);
+```
+`__agbabi_memcpy1` slowly copies byte-by-byte. This is ideal for SRAM.
 
 #### 16-bit memmove
 Used by `__aeabi_memmove` for cases where either `dest` or `src` are half-aligned.
 ```c
 void __agbabi_memmove2(void *restrict dest, const void *restrict src, size_t n);
 ```
-`__agbabi_memmove2` assumes that both of its arguments are 2-byte aligned. This is ideal for VRAM
+`__agbabi_memmove2` assumes that both of its arguments are 2-byte aligned. This is ideal for VRAM.
 
 #### Reverse memory copying
 Used by `__aeabi_memmove` for reverse-copying in cases where `dest > src`.

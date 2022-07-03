@@ -26,6 +26,13 @@ extern "C" {
 /// \param n Number of bytes to copy
 void __agbabi_memcpy2(void *__restrict__ dest, const void *__restrict__ src, size_t n);
 
+/// Copies n bytes from src to dest (forward)
+/// This is a slow, unaligned, byte-by-byte copy: ideal for SRAM
+/// \param dest Destination address
+/// \param src Source address
+/// \param n Number of bytes to copy
+void __agbabi_memcpy1(void *__restrict__ dest, const void *__restrict__ src, size_t n);
+
 /// Fills dest with n bytes of c
 /// Assumes dest is 4-byte aligned
 /// \param dest Destination address

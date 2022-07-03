@@ -6,7 +6,7 @@
  Standard:
     memcpy
  Support:
-    __agbabi_memcpy2
+    __agbabi_memcpy2, __agbabi_memcpy1
 
  Copyright (C) 2021-2022 agbabi contributors
  For conditions of distribution and use, see copyright notice in LICENSE.md
@@ -14,89 +14,115 @@
 ===============================================================================
 */
 
+// Test lowest two bits, clobbering \reg
+// Use mi for low bit, cs for high bit
+.macro joaobapt_test reg
+    movs    \reg, \reg, lsl #31
+.endm
+
+// Branches depending on lowest two bits, clobbering \reg
+// b_mi = low bit case, b_cs = high bit case
+.macro joaobapt_switch reg, b_mi, b_cs
+    joaobapt_test \reg
+    bmi     \b_mi
+    bcs     \b_cs
+.endm
+
+// Branches depending on alignment of \a and \b, clobbering \scratch
+// b_byte = off-by-byte case, b_half = off-by-half case
+.macro align_switch a, b, scratch, b_byte, b_half
+    eor     \scratch, \a, \b
+    joaobapt_switch \scratch, \b_byte, \b_half
+.endm
+
     .arm
     .align 2
 
     .section .iwram.__aeabi_memcpy, "ax", %progbits
     .global __aeabi_memcpy
 __aeabi_memcpy:
-    // Check pointer alignment
-    eor     r3, r1, r0
-    // JoaoBapt carry & sign bit test
-    movs    r3, r3, lsl #31
-    bmi     .Lcopy1
-    bcs     .Lcopy2
+    // >6-bytes is roughly the threshold when byte-by-byte copy is slower
+    cmp     r2, #6
+    ble     __agbabi_memcpy1
 
-.Lcopy4:
-    // Handle <= 2 byte copies byte-by-byte
-    cmp     r2, #2
-    ble     .Lcopy1
+    align_switch r0, r1, r12, __agbabi_memcpy1, .Lcopy_halves
 
-    // Copy half and byte head
-    rsb     r3, r0, #4
-    // JoaoBapt carry & sign bit test
-    movs    r3, r3, lsl #31
+    // Check if r0 (or r1) needs word aligning
+    rsbs     r3, r0, #4
+    joaobapt_test r3
+
+    // Copy byte head to align
     ldrmib  r3, [r1], #1
     strmib  r3, [r0], #1
     submi   r2, r2, #1
+    // r0, r1 are now half aligned
+
+    // Copy half head to align
     ldrcsh  r3, [r1], #2
     strcsh  r3, [r0], #2
     subcs   r2, r2, #2
-    // Fallthrough
+    // r0, r1 are now word aligned
 
     .global __aeabi_memcpy8
 __aeabi_memcpy8:
     .global __aeabi_memcpy4
 __aeabi_memcpy4:
-    // Copy 8 words
+    // Word aligned, 32-byte copy
     movs    r12, r2, lsr #5
-    beq     .Lskip32
-    lsl     r3, r12, #5
-    sub     r2, r2, r3
+    beq     .Lcopy_words
+
+    // Subtract r12 * 32-bytes from r2
+    sub     r2, r2, r12, lsl #5
+
     push    {r4-r10}
-.LcopyWords8:
+.Lloop_32:
     ldmia   r1!, {r3-r10}
     stmia   r0!, {r3-r10}
     subs    r12, r12, #1
-    bne     .LcopyWords8
+    bne     .Lloop_32
     pop     {r4-r10}
-.Lskip32:
+    // < 32 bytes remaining to be copied
 
-    // Copy words
+    // Early out for large 32-byte copies
+    cmp     r2, #0
+    bxeq    lr
+
+.Lcopy_words:
     movs    r12, r2, lsr #2
-.LcopyWords:
+    beq     .Lcopy_halves
+.Lloop_4:
+    ldr     r3, [r1], #4
+    str     r3, [r0], #4
     subs    r12, r12, #1
-    ldrhs   r3, [r1], #4
-    strhs   r3, [r0], #4
-    bhs     .LcopyWords
+    bne     .Lloop_4
 
-    // Copy half and byte tail
-    // JoaoBapt carry & sign bit test
-    movs    r3, r2, lsl #31
+    // Copy byte & half tail
+    joaobapt_test r2
+    // Copy half
     ldrcsh  r3, [r1], #2
     strcsh  r3, [r0], #2
+    // Copy byte
     ldrmib  r3, [r1]
     strmib  r3, [r0]
     bx      lr
 
-.Lcopy2:
-    // Copy byte head
+.Lcopy_halves:
+    // Copy byte head to align
     tst     r0, #1
-    cmpne   r2, #0
     ldrneb  r3, [r1], #1
     strneb  r3, [r0], #1
     subne   r2, r2, #1
-    // Fallthrough
+    // r0, r1 are now half aligned
 
     .global __agbabi_memcpy2
 __agbabi_memcpy2:
-    // Copy halves
     movs    r12, r2, lsr #1
-.LcopyHalves:
+    beq     __agbabi_memcpy1
+.Lloop_2:
+    ldrh    r3, [r1], #2
+    strh    r3, [r0], #2
     subs    r12, r12, #1
-    ldrhsh  r3, [r1], #2
-    strhsh  r3, [r0], #2
-    bhs     .LcopyHalves
+    bne     .Lloop_2
 
     // Copy byte tail
     tst     r2, #1
@@ -104,11 +130,17 @@ __agbabi_memcpy2:
     strneb  r3, [r0]
     bx      lr
 
-.Lcopy1:
+    .global __agbabi_memcpy1
+__agbabi_memcpy1:
+    cmp     r2, #0
+    bxeq    lr
+
+    // Slow byte-copy
+.Lloop_1:
+    ldrb    r3, [r1], #1
+    strb    r3, [r0], #1
     subs    r2, r2, #1
-    ldrhsb  r3, [r1], #1
-    strhsb  r3, [r0], #1
-    bhs     .Lcopy1
+    bne     .Lloop_1
     bx      lr
 
     .section .iwram.memcpy, "ax", %progbits
