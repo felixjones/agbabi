@@ -116,31 +116,24 @@ __aeabi_memcpy4:
 
     .global __agbabi_memcpy2
 __agbabi_memcpy2:
-    movs    r12, r2, lsr #1
-    beq     __agbabi_memcpy1
-.Lloop_2:
-    ldrh    r3, [r1], #2
-    strh    r3, [r0], #2
-    subs    r12, r12, #1
-    bne     .Lloop_2
+    subs    r2, r2, #2
+    ldrhsh  r3, [r1], #2
+    strhsh  r3, [r0], #2
+    bgt     __agbabi_memcpy2
+    bxeq    lr
 
     // Copy byte tail
-    tst     r2, #1
-    ldrneb  r3, [r1]
-    strneb  r3, [r0]
-    bx      lr
+    adds    r2, r2, #1
+    ldreqb  r3, [r1]
+    streqb  r3, [r0]
+    bx lr
 
     .global __agbabi_memcpy1
 __agbabi_memcpy1:
-    cmp     r2, #0
-    bxeq    lr
-
-    // Slow byte-copy
-.Lloop_1:
-    ldrb    r3, [r1], #1
-    strb    r3, [r0], #1
     subs    r2, r2, #1
-    bne     .Lloop_1
+    ldrhsb  r3, [r1], #1
+    strhsb  r3, [r0], #1
+    bgt     __agbabi_memcpy1
     bx      lr
 
     .section .iwram.memcpy, "ax", %progbits
