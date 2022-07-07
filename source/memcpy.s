@@ -126,7 +126,7 @@ __agbabi_memcpy2:
     adds    r2, r2, #1
     ldreqb  r3, [r1]
     streqb  r3, [r0]
-    bx lr
+    bx      lr
 
     .global __agbabi_memcpy1
 __agbabi_memcpy1:
