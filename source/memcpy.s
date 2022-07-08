@@ -67,36 +67,34 @@ __aeabi_memcpy:
 __aeabi_memcpy8:
     .global __aeabi_memcpy4
 __aeabi_memcpy4:
+    tst     r2, #32
+    blt     .Lcopy_words
+
     // Word aligned, 32-byte copy
-    movs    r12, r2, lsr #5
-    beq     .Lcopy_words
-
-    // Subtract r12 * 32-bytes from r2
-    sub     r2, r2, r12, lsl #5
-
     push    {r4-r10}
 .Lloop_32:
-    ldmia   r1!, {r3-r10}
-    stmia   r0!, {r3-r10}
-    subs    r12, r12, #1
-    bne     .Lloop_32
+    subs    r2, r2, #32
+    ldmgeia r1!, {r3-r10}
+    stmgeia r0!, {r3-r10}
+    bgt     .Lloop_32
     pop     {r4-r10}
-    // < 32 bytes remaining to be copied
-
-    // Early out for large 32-byte copies
-    cmp     r2, #0
     bxeq    lr
 
+    // < 32 bytes remaining to be copied
+    add     r2, r2, #32
+
 .Lcopy_words:
-    movs    r12, r2, lsr #2
-    beq     .Lcopy_halves
+    tst     r2, #4
+    blt     .Lcopy_halves
 .Lloop_4:
-    ldr     r3, [r1], #4
-    str     r3, [r0], #4
-    subs    r12, r12, #1
-    bne     .Lloop_4
+    subs    r2, r2, #4
+    ldrge   r3, [r1], #4
+    strge   r3, [r0], #4
+    bgt     .Lloop_4
+    bxeq    lr
 
     // Copy byte & half tail
+    // This test still works when r2 is negative
     joaobapt_test r2
     // Copy half
     ldrcsh  r3, [r1], #2
