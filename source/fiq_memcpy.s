@@ -10,6 +10,10 @@
 ===============================================================================
 */
 
+    .arm
+    .align 2
+
+    .section .iwram.__agbabi_fiq_memcpy4, "ax", %progbits
     .global __agbabi_fiq_memcpy4
 __agbabi_fiq_memcpy4:
     push    {r4-r7}
@@ -77,6 +81,7 @@ __agbabi_fiq_memcpy4:
     streqb  r3, [r0]
     bx      lr
 
+    .section .iwram.__agbabi_fiq_memcpy4x4, "ax", %progbits
     .global __agbabi_fiq_memcpy4x4
 __agbabi_fiq_memcpy4x4:
     push    {r4-r10}
