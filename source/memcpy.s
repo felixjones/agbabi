@@ -45,7 +45,7 @@ __aeabi_memcpy:
     cmp     r2, #6
     ble     __agbabi_memcpy1
 
-    align_switch r0, r1, r12, __agbabi_memcpy1, .Lcopy_halves
+    align_switch r0, r1, r3, __agbabi_memcpy1, .Lcopy_halves
 
     // Check if r0 (or r1) needs word aligning
     rsbs     r3, r0, #4
