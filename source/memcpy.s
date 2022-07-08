@@ -117,8 +117,8 @@ __aeabi_memcpy4:
     .global __agbabi_memcpy2
 __agbabi_memcpy2:
     subs    r2, r2, #2
-    ldrhsh  r3, [r1], #2
-    strhsh  r3, [r0], #2
+    ldrgeh  r3, [r1], #2
+    strgeh  r3, [r0], #2
     bgt     __agbabi_memcpy2
     bxeq    lr
 
@@ -131,8 +131,8 @@ __agbabi_memcpy2:
     .global __agbabi_memcpy1
 __agbabi_memcpy1:
     subs    r2, r2, #1
-    ldrhsb  r3, [r1], #1
-    strhsb  r3, [r0], #1
+    ldrgeb  r3, [r1], #1
+    strgeb  r3, [r0], #1
     bgt     __agbabi_memcpy1
     bx      lr
 
