@@ -2,19 +2,13 @@
 ===============================================================================
 
  Support:
-    __agbabi_fiq_memcpy4
+    __agbabi_fiq_memcpy4, __agbabi_fiq_memcpy4x4
 
  Copyright (C) 2021-2022 agbabi contributors
  For conditions of distribution and use, see copyright notice in LICENSE.md
 
 ===============================================================================
 */
-
-// Test lowest two bits, clobbering \reg
-// Use mi for low bit, cs for high bit
-.macro joaobapt_test reg
-    movs    \reg, \reg, lsl #31
-.endm
 
     .global __agbabi_fiq_memcpy4
 __agbabi_fiq_memcpy4:
@@ -52,8 +46,8 @@ __agbabi_fiq_memcpy4:
     bxeq    lr
 
     // Copy byte & half tail
-    // This test still works when r2 is negative
-    joaobapt_test r2
+    // JoaoBapt test 3-bytes
+    movs    r2, r2, lsl #31
     // Copy half
     ldrcsh  r3, [r1], #2
     strcsh  r3, [r0], #2
@@ -81,4 +75,38 @@ __agbabi_fiq_memcpy4:
     adds    r2, r2, #1
     ldreqb  r3, [r1]
     streqb  r3, [r0]
+    bx      lr
+
+    .global __agbabi_fiq_memcpy4x4
+__agbabi_fiq_memcpy4x4:
+    push    {r4-r10}
+    cmp     r2, #48
+    ble     .Lcopy_tail
+
+    // Enter FIQ mode
+    mrs     r3, cpsr
+    bic     r12, r3, #0x1f
+    orr     r12, #0x11
+    msr     cpsr, r12
+    msr     spsr, r3
+
+.Lloop_48:
+    subs    r2, r2, #48
+    ldmgeia r1!, {r3-r14}
+    stmgeia r0!, {r3-r14}
+    bgt     .Lloop_48
+
+    // Exit FIQ mode
+    mrs     r3, spsr
+    msr     cpsr, r3
+
+.Lcopy_tail:
+    // JoaoBapt test 48-bytes
+    movs    r2, r2, lsl #27
+    ldmcsia r1!, {r3-r10}
+    stmcsia r0!, {r3-r10}
+    ldmmiia r1!, {r3-r6}
+    stmmiia r0!, {r3-r6}
+
+    pop     {r4-r10}
     bx      lr
