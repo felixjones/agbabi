@@ -15,6 +15,7 @@ add_library(agbabi STATIC
     source/atan2.s
     source/context.s
     source/coroutine.s
+        source/fiq_memcpy.s
     source/frac.s
     source/idiv.s
     source/irq.s

@@ -215,6 +215,13 @@ int __agbabi_sqrt(unsigned int x);
 /// \return 16-bit binary angle measurement
 int __agbabi_atan2(int x, int y);
 
+/// Copies n bytes from src to dest in 48-byte chunks (forward) using FIQ mode
+/// Assumes dest and src are 4-byte aligned
+/// \param dest Destination address
+/// \param src Source address
+/// \param n Number of bytes to copy
+void __agbabi_fiq_memcpy4(void *__restrict__ dest, const void *__restrict__ src, size_t n);
+
 #if defined __has_attribute
 #if __has_attribute(__vector_size__)
 
