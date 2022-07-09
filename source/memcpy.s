@@ -14,26 +14,7 @@
 ===============================================================================
 */
 
-// Test lowest two bits, clobbering \reg
-// Use mi for low bit, cs for high bit
-.macro joaobapt_test reg
-    movs    \reg, \reg, lsl #31
-.endm
-
-// Branches depending on lowest two bits, clobbering \reg
-// b_mi = low bit case, b_cs = high bit case
-.macro joaobapt_switch reg, b_mi, b_cs
-    joaobapt_test \reg
-    bmi     \b_mi
-    bcs     \b_cs
-.endm
-
-// Branches depending on alignment of \a and \b, clobbering \scratch
-// b_byte = off-by-byte case, b_half = off-by-half case
-.macro align_switch a, b, scratch, b_byte, b_half
-    eor     \scratch, \a, \b
-    joaobapt_switch \scratch, \b_byte, \b_half
-.endm
+#include "macros.inc"
 
     .arm
     .align 2
@@ -67,7 +48,7 @@ __aeabi_memcpy:
 __aeabi_memcpy8:
     .global __aeabi_memcpy4
 __aeabi_memcpy4:
-    tst     r2, #32
+    cmp     r2, #32
     blt     .Lcopy_words
 
     // Word aligned, 32-byte copy
@@ -84,7 +65,7 @@ __aeabi_memcpy4:
     add     r2, r2, #32
 
 .Lcopy_words:
-    tst     r2, #4
+    cmp     r2, #4
     blt     .Lcopy_halves
 .Lloop_4:
     subs    r2, r2, #4

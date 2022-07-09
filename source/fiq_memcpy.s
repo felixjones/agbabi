@@ -10,6 +10,8 @@
 ===============================================================================
 */
 
+#include "macros.inc"
+
     .arm
     .align 2
 
@@ -50,8 +52,7 @@ __agbabi_fiq_memcpy4:
     bxeq    lr
 
     // Copy byte & half tail
-    // JoaoBapt test 3-bytes
-    movs    r2, r2, lsl #31
+    joaobapt_test r2
     // Copy half
     ldrcsh  r3, [r1], #2
     strcsh  r3, [r0], #2
@@ -86,7 +87,7 @@ __agbabi_fiq_memcpy4:
 __agbabi_fiq_memcpy4x4:
     push    {r4-r10}
     cmp     r2, #48
-    ble     .Lcopy_tail
+    ble     .Lcopy_tail_4x4
 
     // Enter FIQ mode
     mrs     r3, cpsr
@@ -95,19 +96,19 @@ __agbabi_fiq_memcpy4x4:
     msr     cpsr, r12
     msr     spsr, r3
 
-.Lloop_48:
+.Lloop_48_4x4:
     subs    r2, r2, #48
     ldmgeia r1!, {r3-r14}
     stmgeia r0!, {r3-r14}
-    bgt     .Lloop_48
+    bgt     .Lloop_48_4x4
 
     // Exit FIQ mode
     mrs     r3, spsr
     msr     cpsr, r3
 
-.Lcopy_tail:
+.Lcopy_tail_4x4:
     // JoaoBapt test 48-bytes
-    movs    r2, r2, lsl #27
+    joaobapt_test_lsl r2, #27
     ldmcsia r1!, {r3-r10}
     stmcsia r0!, {r3-r10}
     ldmmiia r1!, {r3-r6}
