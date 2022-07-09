@@ -35,10 +35,19 @@ void __agbabi_memcpy1(void *__restrict__ dest, const void *__restrict__ src, siz
 
 /// Fills dest with n bytes of c
 /// Assumes dest is 4-byte aligned
+/// Trailing copy uses the low byte of c
 /// \param dest Destination address
 /// \param n Number of bytes to set
 /// \param c Value to set
 void __agbabi_wordset4(void *dest, size_t n, int c);
+
+/// Fills dest with n bytes of c
+/// Assumes dest is 4-byte aligned
+/// Trailing copy uses the low word of c, and the low byte of c
+/// \param dest Destination address
+/// \param n Number of bytes to set
+/// \param c Value to set
+void __agbabi_lwordset4(void *dest, size_t n, long long c);
 
 /// Copies n bytes from src to dest (backwards)
 /// \param dest Destination address
