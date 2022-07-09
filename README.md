@@ -174,12 +174,30 @@ void __agbabi_rmemcpy(void *restrict dest, const void *restrict src, size_t n);
 
 The `size_t` argument does not need to be a multiple of 4 or 2 for the 4-byte or 2-byte aligned versions, which allows copies with a non-constant size to be specialized according to source and destination alignment.
 
+#### Fast memcpy
+Uses the FIQ registers to rapidly copy bytes from `src` to `dest`.
+```c
+void __agbabi_fiq_memcpy4(void *restrict dest, const void *restrict src, size_t n);
+```
+
+Uses the FIQ registers to rapidly copy bytes from `src` to `dest`, at least 16-bytes at a time.
+```c
+void __agbabi_fiq_memcpy4x4(void *restrict dest, const void *restrict src, size_t n);
+```
+The `size_t` argument must be a multiple of 16 bytes.
+
 #### Memory setting
 The full 32-bits of `c` are copied into `dest`, which is assumed to be 4-byte aligned.
 ```c
 void __agbabi_wordset4(void* dest, size_t n, int c);
 ```
-If the `size_t` argument is not a multiple of 4, the low bytes of `c` will be copied into the remaining space.
+If the `size_t` argument is not a multiple of 4, the low byte of `c` will be copied into the remaining space.
+
+The full 64-bits of `c` are copied into `dest`, which is assumed to be 4-byte aligned.
+```c
+void __agbabi_lwordset4(void* dest, size_t n, long long c);
+```
+If the `size_t` argument is not a multiple of 8, the low word, and then the low byte of `c` will be copied into the remaining space.
 
 ### Context switching
 User-level context switching based on the POSIX context control C library.
