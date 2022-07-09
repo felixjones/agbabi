@@ -155,24 +155,25 @@ void __agbabi_memcpy1(void *restrict dest, const void *restrict src, size_t n);
 ```
 `__agbabi_memcpy1` slowly copies byte-by-byte. This is ideal for SRAM.
 
-#### 16-bit memmove
-Used by `__aeabi_memmove` for cases where either `dest` or `src` are half-aligned.
+#### 8-bit memmove
 ```c
-void __agbabi_memmove2(void *restrict dest, const void *restrict src, size_t n);
+void __agbabi_memmove1(void *restrict dest, const void *restrict src, size_t n);
 ```
-`__agbabi_memmove2` assumes that both of its arguments are 2-byte aligned. This is ideal for VRAM.
+`____agbabi_memmove1` slowly moves byte-by-byte. This is ideal for SRAM.
 
 #### Reverse memory copying
 Used by `__aeabi_memmove` for reverse-copying in cases where `dest > src`.
 ```c
-void __agbabi_rmemcpy4(void *restrict dest, const void *restrict src, size_t n);
-void __agbabi_rmemcpy2(void *restrict dest, const void *restrict src, size_t n);
 void __agbabi_rmemcpy(void *restrict dest, const void *restrict src, size_t n);
 ```
-`__agbabi_rmemcpy4` assumes that both of its arguments are 4-byte aligned.    
-`__agbabi_rmemcpy2` assumes that both of its arguments are 2-byte aligned.
-
 The `size_t` argument does not need to be a multiple of 4 or 2 for the 4-byte or 2-byte aligned versions, which allows copies with a non-constant size to be specialized according to source and destination alignment.
+
+#### 8-bit rmemcpy
+Used by `__aeabi_rmemcpy` for cases where either `dest` or `src` are unaligned.
+```c
+void __agbabi_rmemcpy1(void *restrict dest, const void *restrict src, size_t n);
+```
+`__agbabi_rmemcpy1` slowly copies byte-by-byte. This is ideal for SRAM.
 
 #### Fast memcpy
 Uses the FIQ registers to rapidly copy bytes from `src` to `dest`.

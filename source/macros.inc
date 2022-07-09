@@ -21,6 +21,12 @@
     joaobapt_test_lsl \reg, #31
 .endm
 
+// Test lowest two bits of \src, result stored in \dst
+// Use mi for low bit, cs for high bit
+.macro joaobapt_test_into dst, src
+    movs    \dst, \src, lsl #31
+.endm
+
 // Branches depending on lowest two bits, clobbering \reg
 // b_mi = low bit case, b_cs = high bit case
 .macro joaobapt_switch reg, b_mi, b_cs

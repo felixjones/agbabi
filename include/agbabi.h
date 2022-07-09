@@ -56,18 +56,11 @@ void __agbabi_lwordset4(void *dest, size_t n, long long c);
 void __agbabi_rmemcpy(void *__restrict__ dest, const void *__restrict__ src, size_t n);
 
 /// Copies n bytes from src to dest (backwards)
-/// Assumes dest and src are 2-byte aligned
+/// This is a slow, unaligned, byte-by-byte copy: ideal for SRAM
 /// \param dest Destination address
 /// \param src Source address
 /// \param n Number of bytes to copy
-void __agbabi_rmemcpy2(void *__restrict__ dest, const void *__restrict__ src, size_t n);
-
-/// Copies n bytes from src to dest (backwards)
-/// Assumes dest and src are 4-byte aligned
-/// \param dest Destination address
-/// \param src Source address
-/// \param n Number of bytes to copy
-void __agbabi_rmemcpy4(void *__restrict__ dest, const void *__restrict__ src, size_t n);
+void __agbabi_rmemcpy1(void *__restrict__ dest, const void *__restrict__ src, size_t n);
 
 /// Unsigned 64-bit / 32-bit -> 64-bit division
 /// \param numerator

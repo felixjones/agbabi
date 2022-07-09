@@ -29,7 +29,7 @@ __aeabi_memcpy:
     align_switch r0, r1, r3, __agbabi_memcpy1, .Lcopy_halves
 
     // Check if r0 (or r1) needs word aligning
-    rsbs     r3, r0, #4
+    rsbs    r3, r0, #4
     joaobapt_test r3
 
     // Copy byte head to align
