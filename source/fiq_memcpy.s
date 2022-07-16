@@ -85,7 +85,7 @@ __agbabi_fiq_memcpy4:
     .section .iwram.__agbabi_fiq_memcpy4x4, "ax", %progbits
     .global __agbabi_fiq_memcpy4x4
 __agbabi_fiq_memcpy4x4:
-    push    {r4-r10}
+    push    {r4-r10, r12} // r12 for alignment
     cmp     r2, #48
     ble     .Lcopy_tail_4x4
 
@@ -114,5 +114,5 @@ __agbabi_fiq_memcpy4x4:
     ldmmiia r1!, {r3-r6}
     stmmiia r0!, {r3-r6}
 
-    pop     {r4-r10}
+    pop     {r4-r10, r12} // r12 for alignment
     bx      lr

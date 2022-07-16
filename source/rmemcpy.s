@@ -44,7 +44,7 @@ __agbabi_rmemcpy:
     blt     .Lcopy_words
 
     // Word aligned, 32-byte copy
-    push    {r0-r1, r4-r10}
+    push    {r0-r1, r4-r10, r12} // r12 for alignment
     add     r0, r0, r2
     add     r1, r1, r2
 .Lloop_32:
@@ -52,7 +52,7 @@ __agbabi_rmemcpy:
     ldmgedb r1!, {r3-r10}
     stmgedb r0!, {r3-r10}
     bgt     .Lloop_32
-    pop     {r0-r1, r4-r10}
+    pop     {r0-r1, r4-r10, r12} // r12 for alignment
     bxeq    lr
 
     // < 32 bytes remaining to be copied

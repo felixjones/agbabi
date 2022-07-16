@@ -52,13 +52,13 @@ __aeabi_memcpy4:
     blt     .Lcopy_words
 
     // Word aligned, 32-byte copy
-    push    {r4-r10}
+    push    {r4-r10, r12} // r12 for alignment
 .Lloop_32:
     subs    r2, r2, #32
     ldmgeia r1!, {r3-r10}
     stmgeia r0!, {r3-r10}
     bgt     .Lloop_32
-    pop     {r4-r10}
+    pop     {r4-r10, r12} // r12 for alignment
     bxeq    lr
 
     // < 32 bytes remaining to be copied
