@@ -66,16 +66,14 @@ __agbabi_rmemcpy:
     bxeq    lr
 
     // Copy byte & half head
-    add     r2, r2, #4
     joaobapt_test_into r3, r2
     // Copy half
-    subcs   r2, r2, #2
+    addcs   r2, r2, #2
     ldrcsh  r3, [r1, r2]
     strcsh  r3, [r0, r2]
     // Copy byte
-    submi   r2, r2, #1
-    ldrmib  r3, [r1, r2]
-    strmib  r3, [r0, r2]
+    ldrmib  r3, [r1]
+    strmib  r3, [r0]
     bx      lr
 
 .Lcopy_halves:
@@ -95,9 +93,8 @@ __agbabi_rmemcpy:
     bxeq    lr
 
     // Copy byte head
-    adds    r2, r2, #1
-    ldreqb  r3, [r1]
-    streqb  r3, [r0]
+    ldrb    r3, [r1]
+    strb    r3, [r0]
     bx      lr
 
     .global __agbabi_rmemcpy1
