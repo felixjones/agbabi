@@ -18,6 +18,9 @@
     .section .iwram.__agbabi_fiq_memcpy4, "ax", %progbits
     .global __agbabi_fiq_memcpy4
 __agbabi_fiq_memcpy4:
+    cmp     r2, #48
+    blt     .Lcopy_words
+
     push    {r4-r7}
     mrs     r3, cpsr
 
@@ -63,7 +66,7 @@ __agbabi_fiq_memcpy4:
 __agbabi_fiq_memcpy4x4:
     push    {r4-r10, r12} // r12 for alignment
     cmp     r2, #48
-    ble     .Lcopy_tail_4x4
+    blt     .Lcopy_tail_4x4
 
     // Enter FIQ mode
     mrs     r3, cpsr
