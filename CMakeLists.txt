@@ -47,3 +47,5 @@ target_compile_options(agbabi PRIVATE
 if(USE_DEVKITARM)
     target_compile_definitions(agbabi PRIVATE __DEVKITARM__)
 endif()
+
+install(TARGETS agbabi DESTINATION ".")
