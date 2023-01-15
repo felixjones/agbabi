@@ -1,6 +1,7 @@
 project('agbabi', 'c',
   version: '2.0.0',
   license: 'Zlib',
+  meson_version: '>=0.54.0',
   default_options: ['warning_level=2'])
 
 sources_asm = [
