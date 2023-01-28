@@ -1,16 +1,14 @@
-/*
-===============================================================================
-
- ABI:
-    __aeabi_memmove, __aeabi_memmove4, __aeabi_memmove8
- Standard:
-    memmove
-
- Copyright (C) 2021-2022 agbabi contributors
- For conditions of distribution and use, see copyright notice in LICENSE.md
-
-===============================================================================
-*/
+@===============================================================================
+@
+@ ABI:
+@    __aeabi_memmove, __aeabi_memmove4, __aeabi_memmove8
+@ Standard:
+@    memmove
+@
+@ Copyright (C) 2021-2023 agbabi contributors
+@ For conditions of distribution and use, see copyright notice in LICENSE.md
+@
+@===============================================================================
 
     .arm
     .align 2

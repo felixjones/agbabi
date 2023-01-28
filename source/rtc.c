@@ -5,121 +5,253 @@
     _gettimeofday, settimeofday
 
  Support:
-    __agbabi_rtc_init
+    __agbabi_rtc_init, __agbabi_rtc_time, __agbabi_rtc_settime,
+    __agbabi_rtc_datetime, __agbabi_rtc_setdatetime
 
- Copyright (C) 2021-2022 agbabi contributors
+ Copyright (C) 2021-2023 agbabi contributors
  For conditions of distribution and use, see copyright notice in LICENSE.md
 
 ===============================================================================
 */
 
 #include <agbabi.h>
+#include <reent.h>
+#include <time.h>
+
+#define RTC_OK      (0x00)
+#define RTC_EPOWER  (0x01)
+#define RTC_E12HOUR (0x02)
+#define RTC_EYEAR   (0x03)
+#define RTC_EMON    (0x04)
+#define RTC_EDAY    (0x05)
+#define RTC_EWDAY   (0x06)
+#define RTC_EHOUR   (0x07)
+#define RTC_EMIN    (0x08)
+#define RTC_ESEC    (0x09)
+
+#define RTC_INTFE   (0x01)
+#define RTC_INTME   (0x02)
+#define RTC_INTAE   (0x04)
+#define RTC_24HOUR  (0x40)
+#define RTC_POWER   (0x80)
+
+#define RTC_TEST (0x80)
+
+#define CMD_RESET           (0x06)
+#define CMD_DATETIME_WRITE  (0x26)
+#define CMD_STATUS_WRITE    (0x46)
+#define CMD_TIME_WRITE      (0x66)
+#define CMD_DATETIME_READ   (0xa6)
+#define CMD_STATUS_READ     (0xc6)
+#define CMD_TIME_READ       (0xe6)
 
 typedef unsigned short u16;
 typedef volatile u16 vu16;
 
-#define TM_YEAR(X)       (((X) >> 32) & 0xff)
-#define TM_YEAR_UNIT(X)  ((TM_YEAR(X) >> 0) & 0x0f)
-#define TM_MONTH(X)      (((X) >> 40) & 0xff)
-#define TM_MONTH_UNIT(X) ((TM_MONTH(X) >> 0) & 0x0f)
-#define TM_DAY(X)        (((X) >> 48) & 0xff)
-#define TM_DAY_UNIT(X)   ((TM_DAY(X) >> 0) & 0x0f)
-#define TM_WDAY(X)       (((X) >> 56) & 0xff)
-#define TM_WDAY_UNIT(X)  ((TM_WDAY(X) >> 0) & 0x0f)
-#define TM_HOUR(X)       (((X) >> 0) & 0xff)
-#define TM_HOUR_UNIT(X)  ((TM_HOUR(X) >> 0) & 0x0f)
-#define TM_MIN(X)        (((X) >> 8) & 0xff)
-#define TM_MIN_UNIT(X)   ((TM_MIN(X) >> 0) & 0x0f)
-#define TM_SEC(X)        (((X) >> 16) & 0xff)
-#define TM_SEC_UNIT(X)   ((TM_SEC(X) >> 0) & 0x0f)
+#define ADDR_IME            ((vu16*) 0x4000208)
+#define ADDR_GPIO_PORT_DATA ((vu16*) 0x80000c4)
+#define ADDR_GPIO_PORT_DIR  ((vu16*) 0x80000c6)
+#define ADDR_GPIO_PORT_CNT  ((vu16*) 0x80000c8)
 
-int __agbabi_rtc_init() {
-    int status = __agbabi_rtc_status();
-    if ((status & agbagbi_rtc_POWER) || (status & agbagbi_rtc_24HOUR) == 0) {
-        __agbabi_rtc_reset();
+static unsigned int gpio_read(int n);
+static void gpio_write(unsigned int x, int n);
+
+static unsigned int rtc_status(void);
+static void rtc_reset(void);
+
+static int bcd_decode(unsigned int x) __attribute__((const));
+static unsigned int bcd_encode(int x) __attribute__((const));
+
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
+int __agbabi_rtc_init(void) {
+    *ADDR_GPIO_PORT_CNT = 1;
+    unsigned int status = rtc_status();
+
+    if (unlikely((status & RTC_POWER) == RTC_POWER || (status & RTC_24HOUR) == 0)) {
+        rtc_reset();
     }
 
-    const int time = __agbabi_rtc_time();
-    if (time & agbagbi_rtc_TEST) {
-        __agbabi_rtc_reset(); // Reset to leave test mode
+    const unsigned int time = __agbabi_rtc_time();
+
+    if (time & RTC_TEST) {
+        rtc_reset(); /* Reset to leave test mode */
     }
 
-    status = __agbabi_rtc_status();
+    status = rtc_status();
 
-    if (__builtin_expect(status & agbagbi_rtc_POWER, 0)) {
-        return agbabi_rtc_EPOWER;
+    if (unlikely((status & RTC_POWER) == RTC_POWER)) {
+        return RTC_EPOWER;
     }
 
-    if (!__builtin_expect(status & agbagbi_rtc_24HOUR, agbagbi_rtc_24HOUR)) {
-        return agbabi_rtc_E12HOUR;
+    if (unlikely((status & RTC_24HOUR) == 0)) {
+        return RTC_E12HOUR;
     }
 
-    const long long datetime = __agbabi_rtc_ldatetime();
-
-    if (__builtin_expect(TM_YEAR(datetime) > 0x9f || TM_YEAR_UNIT(datetime) > 9, 1)) {
-        return agbabi_rtc_EYEAR;
-    }
-
-    if (__builtin_expect(TM_MONTH(datetime) == 0 || TM_MONTH(datetime) > 0x1f || TM_MONTH_UNIT(datetime) > 9, 1)) {
-        return agbabi_rtc_EMON;
-    }
-
-    if (__builtin_expect(TM_DAY(datetime) == 0 || TM_DAY(datetime) > 0x3f || TM_DAY_UNIT(datetime) > 9, 1)) {
-        return agbabi_rtc_EDAY;
-    }
-
-    if (__builtin_expect((TM_WDAY(datetime) & 0xf8) || TM_WDAY_UNIT(datetime) > 6, 1)) {
-        return agbabi_rtc_EWDAY;
-    }
-
-    if (__builtin_expect(TM_HOUR(datetime) > 0x2f || TM_HOUR_UNIT(datetime) > 9, 1)) {
-        return agbabi_rtc_EHOUR;
-    }
-
-    if (__builtin_expect(TM_MIN(datetime) > 0x5f || TM_MIN_UNIT(datetime) > 9, 1)) {
-        return agbabi_rtc_EMIN;
-    }
-
-    if (__builtin_expect(TM_SEC(datetime) > 0x5f || TM_SEC_UNIT(datetime) > 9, 1)) {
-        return agbabi_rtc_ESEC;
-    }
-
-    return agbabi_rtc_OK;
+    return RTC_OK;
 }
 
-#ifndef NO_POSIX
+unsigned int __agbabi_rtc_time(void) {
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x5;
 
-#include <sys/time.h>
+    *ADDR_GPIO_PORT_DIR = 0x7;
+    gpio_write(CMD_TIME_READ, 8);
 
-#define BCD_DECODE(X) (((X) & 0xfu) + (((X) >> 4u) * 10u))
-#define BCD_ENCODE(X) (((X) % 10) + (((X) / 10) << 4))
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    unsigned int time = gpio_read(23);
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x1;
 
-#define MAKE_YEAR(X)  (((long long) (X)) << 32)
-#define MAKE_MONTH(X) (((long long) (X)) << 40)
-#define MAKE_DAY(X)   (((long long) (X)) << 48)
-#define MAKE_WDAY(X)  (((long long) (X)) << 56)
-#define MAKE_HOUR(X)  (((long long) (X)) << 0)
-#define MAKE_MIN(X)   (((long long) (X)) << 8)
-#define MAKE_SEC(X)   (((long long) (X)) << 16)
+    return time;
+}
 
-#define REG_IME ((vu16*) 0x4000208)
+void __agbabi_rtc_settime(unsigned int time) {
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x5;
 
-int _gettimeofday(struct timeval* __restrict__ tv, __attribute__((unused)) struct timezone* tz) {
-    const int ime = *REG_IME;
-    *REG_IME = 0;
-    const long long datetime = __agbabi_rtc_ldatetime();
-    *REG_IME = ime;
+    *ADDR_GPIO_PORT_DIR = 0x7;
+    gpio_write(CMD_TIME_WRITE, 8);
+
+    gpio_write(time, 23);
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+}
+
+__agbabi_datetime_t __agbabi_rtc_datetime(void) {
+    __agbabi_datetime_t datetime;
+
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x5;
+
+    *ADDR_GPIO_PORT_DIR = 0x7;
+    gpio_write(CMD_DATETIME_READ, 8);
+
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    datetime[0] = gpio_read(32);
+    datetime[1] = gpio_read(23);
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+
+    return datetime;
+}
+
+void __agbabi_rtc_setdatetime(__agbabi_datetime_t datetime) {
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x5;
+
+    *ADDR_GPIO_PORT_DIR = 0x7;
+    gpio_write(CMD_DATETIME_WRITE, 8);
+
+    gpio_write(datetime[0], 32);
+    gpio_write(datetime[1], 23);
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+}
+
+unsigned int gpio_read(int n) {
+    unsigned int result = 0;
+
+    for (int i = 0; i < n; ++i) {
+        __asm__ volatile (
+            "lsr     %[res], %[res], #1"            "\n\t"
+            "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
+            "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
+            "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
+            "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
+            "strh    %[b101], [%[GPIO_PORT_DATA]]"  "\n\t"
+            "ldrh    r7, [%[GPIO_PORT_DATA]]"       "\n\t"
+            "lsl     r7, #30"                       "\n\t"
+            "orr     %[res], %[res], r7"
+            :   [res]"+l"(result)
+            :   [GPIO_PORT_DATA]"l"(ADDR_GPIO_PORT_DATA),
+                [b100]"l"(0x4),
+                [b101]"l"(0x5)
+            :   "r7"
+        );
+    }
+
+    return result >> (32 - n);
+}
+
+void gpio_write(unsigned int x, int n) {
+    for (int i = 0; i < n; ++i) {
+        const unsigned int bit = (0x1 & x) << 1;
+
+        x >>= 1;
+
+        __asm__ volatile (
+            "strh    %[b1x0], [%[GPIO_PORT_DATA]]"  "\n\t"
+            "strh    %[b1x0], [%[GPIO_PORT_DATA]]"  "\n\t"
+            "strh    %[b1x0], [%[GPIO_PORT_DATA]]"  "\n\t"
+            "strh    %[b1x1], [%[GPIO_PORT_DATA]]"
+            ::  [GPIO_PORT_DATA]"l"(ADDR_GPIO_PORT_DATA),
+                [b1x0]"l"(bit | 0x4),
+                [b1x1]"l"(bit | 0x5)
+        );
+    }
+}
+
+unsigned int rtc_status(void) {
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x5;
+
+    *ADDR_GPIO_PORT_DIR = 0x7;
+    gpio_write(CMD_STATUS_READ, 8);
+
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    unsigned int status = gpio_read(8);
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+
+    return status;
+}
+
+void rtc_reset(void) {
+    *ADDR_GPIO_PORT_DIR = 0x5;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x5;
+
+    *ADDR_GPIO_PORT_DIR = 0x7;
+    gpio_write(CMD_RESET, 8);
+
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x5;
+
+    *ADDR_GPIO_PORT_DIR = 0x7;
+    gpio_write(CMD_STATUS_WRITE, 8);
+    gpio_write(0x40, 8);
+
+    *ADDR_GPIO_PORT_DATA = 0x1;
+    *ADDR_GPIO_PORT_DATA = 0x1;
+}
+
+int _gettimeofday(struct timeval* __restrict__ tv, __attribute__((unused)) void* __restrict__ tz) {
+    __agbabi_datetime_t datetime;
+
+    const u16 ime = *ADDR_IME;
+
+    *ADDR_IME = 0;
+    datetime = __agbabi_rtc_datetime();
+    *ADDR_IME = ime;
 
     struct tm time;
-    time.tm_year = BCD_DECODE(TM_YEAR(datetime)) + (2000 - 1900);
-    time.tm_mon = BCD_DECODE(TM_MONTH(datetime)) - 1;
-    time.tm_mday = BCD_DECODE(TM_DAY(datetime));
+    time.tm_year = bcd_decode(datetime[0] & 0xff) + (2000 - 1900);
+    time.tm_mon = bcd_decode((datetime[0] >> 8) & 0xff) - 1;
+    time.tm_mday = bcd_decode((datetime[0] >> 16) & 0xff);
+    time.tm_wday = bcd_decode((datetime[0] >> 24) & 0xff);
 
-    time.tm_hour = BCD_DECODE(TM_HOUR(datetime));
-    time.tm_min = BCD_DECODE(TM_MIN(datetime));
-    time.tm_sec = BCD_DECODE(TM_SEC(datetime));
+    time.tm_hour = bcd_decode(datetime[1] & 0xff);
+    time.tm_min = bcd_decode((datetime[1] >> 8) & 0xff);
+    time.tm_sec = bcd_decode((datetime[1] >> 16) & 0xff);
 
-    time.tm_wday = BCD_DECODE(TM_WDAY(datetime));
     time.tm_yday = 0;
     time.tm_isdst = 0;
 
@@ -128,34 +260,34 @@ int _gettimeofday(struct timeval* __restrict__ tv, __attribute__((unused)) struc
     return 0;
 }
 
-#if defined(__DEVKITARM__)
-int _gettimeofday_r(__attribute__((unused)) void* __restrict__ reent, struct timeval* __restrict__ tv, __attribute__((unused)) struct timezone* tz) {
-    return _gettimeofday(tv, tz);
-}
-#endif
-
-int settimeofday(const struct timeval* __restrict__ tv, __attribute__((unused)) const struct timezone* __restrict__ tz) {
+int settimeofday(const struct timeval* tv, __attribute__((unused)) const struct timezone* tz) {
     const struct tm* tmptr = gmtime(&tv->tv_sec);
 
-    const int year = BCD_ENCODE(tmptr->tm_year - (2000 - 1900));
-    const int mon = BCD_ENCODE(tmptr->tm_mon) + 1;
-    const int mday = BCD_ENCODE(tmptr->tm_mday);
+    const __agbabi_datetime_t datetime = {
+        bcd_encode(tmptr->tm_year - (2000 - 1900)) | ((bcd_encode(tmptr->tm_mon) + 1) << 8) | (bcd_encode(tmptr->tm_mday) << 16) | (bcd_encode(tmptr->tm_wday) << 24),
+        bcd_encode(tmptr->tm_hour) | (bcd_encode(tmptr->tm_min) << 8) | (bcd_encode(tmptr->tm_sec) << 16)
+    };
 
-    const int wday = BCD_ENCODE(tmptr->tm_wday);
-
-    const int hour = BCD_ENCODE(tmptr->tm_hour);
-    const int min = BCD_ENCODE(tmptr->tm_min);
-    const int sec = BCD_ENCODE(tmptr->tm_sec);
-
-    const long long datetime = MAKE_YEAR(year) | MAKE_MONTH(mon) | MAKE_DAY(mday) |
-            MAKE_WDAY(wday) | MAKE_HOUR(hour) | MAKE_MIN(min) | MAKE_SEC(sec);
-
-    const int ime = *REG_IME;
-    *REG_IME = 0;
-    __agbabi_rtc_setldatetime(datetime);
-    *REG_IME = ime;
+    const u16 ime = *ADDR_IME;
+    *ADDR_IME = 0;
+    __agbabi_rtc_setdatetime(datetime);
+    *ADDR_IME = ime;
 
     return 0;
+}
+
+int bcd_decode(unsigned int x) {
+    return (int) ((x & 0xf) + ((x >> 4) * 10));
+}
+
+unsigned int bcd_encode(int x) {
+    return ((unsigned int) x % 10u) | (((unsigned int) x / 10u) << 4u);
+}
+
+#if defined(__DYNAMIC_REENT__)
+
+int _gettimeofday_r(__attribute__((unused)) struct _reent* __restrict__ reent, struct timeval* __restrict__ tv, void* __restrict__ tz) {
+    return _gettimeofday(tv, tz);
 }
 
 #endif

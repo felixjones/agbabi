@@ -1,14 +1,12 @@
-/*
-===============================================================================
-
- ABI:
-    __aeabi_lmul, __aeabi_llsl, __aeabi_llsr, __aeabi_lasr
-
- Copyright (C) 2021-2022 agbabi contributors
- For conditions of distribution and use, see copyright notice in LICENSE.md
-
-===============================================================================
-*/
+@===============================================================================
+@
+@ ABI:
+@    __aeabi_lmul, __aeabi_llsl, __aeabi_llsr, __aeabi_lasr
+@
+@ Copyright (C) 2021-2023 agbabi contributors
+@ For conditions of distribution and use, see copyright notice in LICENSE.md
+@
+@===============================================================================
 
     .arm
     .align 2

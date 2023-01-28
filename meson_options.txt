@@ -1,1 +1,0 @@
-option('use_devkitarm', type: 'boolean', value: false)

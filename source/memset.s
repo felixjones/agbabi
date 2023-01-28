@@ -1,21 +1,19 @@
-/*
-===============================================================================
+@===============================================================================
+@
+@ ABI:
+@    __aeabi_memclr, __aeabi_memclr4, __aeabi_memclr8,
+@    __aeabi_memset, __aeabi_memset4, __aeabi_memset8
+@ Standard:
+@    memset
+@ Support:
+@    __agbabi_wordset4, __agbabi_lwordset4, __agbabi_memset1
+@
+@ Copyright (C) 2021-2023 agbabi contributors
+@ For conditions of distribution and use, see copyright notice in LICENSE.md
+@
+@===============================================================================
 
- ABI:
-    __aeabi_memset, __aeabi_memset4, __aeabi_memset8,
-    __aeabi_memclr, __aeabi_memclr4, __aeabi_memclr8
- Standard:
-    memset
- Support:
-    __agbabi_wordset4, __agbabi_lwordset4
-
- Copyright (C) 2021-2022 agbabi contributors
- For conditions of distribution and use, see copyright notice in LICENSE.md
-
-===============================================================================
-*/
-
-#include "macros.inc"
+.include "macros.inc"
 
     .arm
     .align 2
@@ -24,7 +22,7 @@
     .global __aeabi_memclr
 __aeabi_memclr:
     mov     r2, #0
-    b       .Lwordset
+    b       __aeabi_memset
 
     .global __aeabi_memclr8
 __aeabi_memclr8:
@@ -36,22 +34,25 @@ __aeabi_memclr4:
     .section .iwram.__aeabi_memset, "ax", %progbits
     .global __aeabi_memset
 __aeabi_memset:
-    mov     r2, r2, lsl #24
-    orr     r2, r2, r2, lsr #8
-    orr     r2, r2, r2, lsr #16
+    @ < 8 bytes probably won't be aligned: go byte-by-byte
+    cmp     r1, #8
+    blt     __agbabi_memset1
 
-.Lwordset:
-    // Handle < 4 bytes in byte-by-byte tail
-    cmp     r1, #4
-    blt     .Lset_tail3
-
-    // Check if address needs word aligning
-    rsbs     r3, r0, #4
+    @ Copy head to align to next word
+    rsb     r3, r0, #4
     joaobapt_test r3
     strmib  r2, [r0], #1
     submi   r1, r1, #1
     strcsh  r2, [r0], #2
     subcs   r1, r1, #2
+
+    .global __aeabi_memset8
+__aeabi_memset8:
+    .global __aeabi_memset4
+__aeabi_memset4:
+    lsl     r2, r2, #24
+    orr     r2, r2, r2, lsr #8
+    orr     r2, r2, r2, lsr #16
 
     .global __agbabi_wordset4
 __agbabi_wordset4:
@@ -59,11 +60,11 @@ __agbabi_wordset4:
 
     .global __agbabi_lwordset4
 __agbabi_lwordset4:
-    // >=64-bytes is roughly the threshold when 8-byte copy is slower
+    @ 16 words is roughly the threshold when lwordset is slower
     cmp     r1, #64
-    blt     .Lloop_8
+    blt     .Lset_2_words
 
-    // Load up registers
+    @ 8 word set
     push    {r4-r9}
     mov     r4, r2
     mov     r5, r3
@@ -72,29 +73,39 @@ __agbabi_lwordset4:
     mov     r8, r2
     mov     r9, r3
 
-.Lloop_32:
-    subs    r1, r1, #32
+.Lset_8_words:
     stmgeia r0!, {r2-r9}
-    bgt     .Lloop_32
+    subs    r1, r1, #32
+    bgt     .Lset_8_words
     pop     {r4-r9}
     bxeq    lr
-    add     r1, r1, #32
 
-.Lloop_8:
+    @ Fixup remaining
+    add     r1, r1, #32
+.Lset_2_words:
     subs    r1, r1, #8
     stmgeia r0!, {r2-r3}
-    bgt     .Lloop_8
+    bgt     .Lset_2_words
     bxeq    lr
 
-    // Copy word tail
+    @ Test for remaining word
     adds    r1, r1, #4
     strge   r2, [r0], #4
     bxeq    lr
 
-.Lset_tail3:
+    @ Set tail
     joaobapt_test r1
     strcsh  r2, [r0], #2
-    strmib  r2, [r0]
+    subcs   r1, r1, #2
+    strmib  r2, [r0], #1
+    submi   r1, r1, #1
+    bx      lr
+
+    .global __agbabi_memset1
+__agbabi_memset1:
+    subs    r1, r1, #1
+    strgeb  r2, [r0], #1
+    bgt     __agbabi_memset1
     bx      lr
 
     .section .iwram.memset, "ax", %progbits
