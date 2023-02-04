@@ -1,7 +1,7 @@
 project('agbabi', 'c',
   version: '2.0.0',
   license: 'Zlib',
-  meson_version: '>=0.54.0',
+  meson_version: '>=0.60.0',
   default_options: ['warning_level=2'])
 
 sources_asm = [
@@ -35,7 +35,13 @@ sources_c = [
 
 includes = ['include']
 
-if get_option('use_devkitarm')
+cc = meson.get_compiler('c')
+
+cc_ver = run_command(cc, '--version', capture: true, check: false)
+
+have_devkitarm = cc_ver.stdout().to_lower().contains('devkitarm')
+
+if get_option('use_devkitarm').require(have_devkitarm).allowed()
   add_project_arguments('-D__DEVKITARM__', language: 'c')
 endif
 

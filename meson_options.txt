@@ -1,1 +1,1 @@
-option('use_devkitarm', type: 'boolean', value: false)
+option('use_devkitarm', type: 'feature', value: 'auto', deprecated: {'true': 'enabled', 'false': 'disabled'})
