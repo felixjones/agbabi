@@ -8,7 +8,7 @@
 #===============================================================================
 
 project('agbabi', 'c',
-  version: '2.0.0',
+  version: '2.1.0',
   license: 'Zlib',
   meson_version: '>=0.56.2',
   default_options: [
@@ -54,7 +54,7 @@ c_args = [
   '-ffunction-sections',
   '-fdata-sections',
 ]
-if get_option('warning_level') >= '3'
+if get_option('warning_level') == '3'
   c_args += '-Wconversion'
 endif
 
