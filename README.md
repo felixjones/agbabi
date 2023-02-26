@@ -2,7 +2,7 @@
 
 ## Quick Start Guide
 
-Link with `libagbabi.a` via the normal means for your build environment (eg: `-Lagbabi` for GCC and Clang).
+Link with `libagbabi.a` via the normal means for your build environment (eg: `-Lagbabi` for GCC and Clang), and add the `include` directory via the normal means for your build environment (eg: `-Iagbabi/include`).
 
 Linking will implicitly activate the `armeabi` library.
 
@@ -28,9 +28,9 @@ int main() {
 
 ## API Reference
 
-- [aeabi](docs/aeabi.md)
-- [agbabi](docs/agbabi.md)
-- [POSIX](docs/posix.md)
+- [Arm Standard Compiler Helper Function Library (aeabi)](docs/aeabi.md)
+- [AGB Support Library (agbabi)](docs/agbabi.md)
+- [POSIX Support Library](docs/posix.md)
 
 ## Building
 

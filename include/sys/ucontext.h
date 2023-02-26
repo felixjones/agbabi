@@ -73,7 +73,7 @@ int swapcontext(ucontext_t* __restrict__ oucp, const ucontext_t* __restrict__ uc
  * @param argc Number of arguments passed to func
  * @param ... List of arguments to be passed to func
  */
-void makecontext(ucontext_t* ucp, void(*func)(), int argc, ...) __attribute__((nonnull(1, 2)));
+void makecontext(ucontext_t* ucp, void(*func)(void), int argc, ...) __attribute__((nonnull(1, 2)));
 
 #if defined( __cplusplus )
 } // extern "C"

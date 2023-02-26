@@ -1,9 +1,9 @@
 @===============================================================================
 @
 @ ABI:
-@    __aeabi_uldiv, __aeabi_uldivmod
+@    __aeabi_uldivmod
 @ Support:
-@    __agbabi_unsafe_uldivmod
+@    __agbabi_uldiv, __agbabi_unsafe_uldivmod
 @
 @ Taken with permission from github.com/JoaoBaptMG/gba-modern (2020-11-17)
 @ Modified for libagbabi
@@ -24,8 +24,8 @@
 __aeabi_uldivmod:
     @ Fallthrough
 
-    .global __aeabi_uldiv
-__aeabi_uldiv:
+    .global __agbabi_uldiv
+__agbabi_uldiv:
     @ Check if the high word of the denominator is zero
     cmp     r3, #0
     .extern __agbabi_uluidiv

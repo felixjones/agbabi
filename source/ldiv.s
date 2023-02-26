@@ -1,7 +1,9 @@
 @===============================================================================
 @
 @ ABI:
-@    __aeabi_ldiv, __aeabi_ldivmod
+@    __aeabi_ldivmod
+@ Support:
+@    __agbabi_ldiv
 @
 @ Taken with permission from github.com/JoaoBaptMG/gba-modern (2020-11-17)
 @ Modified for libagbabi
@@ -18,8 +20,8 @@
 __aeabi_ldivmod:
     @ Fallthrough
 
-    .global __aeabi_ldiv
-__aeabi_ldiv:
+    .global __agbabi_ldiv
+__agbabi_ldiv:
     @ Test division by zero
     cmp     r3, #0
     cmpeq   r2, #0
