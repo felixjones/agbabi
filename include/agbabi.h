@@ -151,15 +151,15 @@ void __agbabi_wordset4(void* dest, size_t n, int c) __attribute__((nonnull(1)));
 
 /**
  * Fixed-point sine approximation
- * @param x 16-bit binary angle measurement
- * @return 32-bit signed fixed point (Q29) between -1 and +1
+ * @param x 15-bit binary angle measurement
+ * @return Q29 signed fixed point between -1 and +1
  */
 int __agbabi_sin(int x) __attribute__((const));
 
 /**
  * Calculates the arc tangent of x, y
- * @param x 1.14 signed fixed-point coord around circle
- * @param y 1.14 signed fixed-point coord around circle
+ * @param x Q12 signed fixed point coord around circle
+ * @param y Q12 signed fixed point coord around circle
  * @return 15-bit binary angle measurement
  */
 unsigned int __agbabi_atan2(int x, int y) __attribute__((const));

@@ -48,6 +48,20 @@ Uses the additional registers of Fast IRQ CPU mode to perform a very fast memory
 
 ## Additional math functions
 
+```c
+#include <agbabi.h>
+
+int main() {
+    /* takes a 15-bit binary angle measurement, where 0x4000 = 180 degrees or Pi radians */
+    int a = __agbabi_sin(0x1000); /* returns a 32-bit Q29 fixed point value between -1 and +1 */
+    /* `a` is roughly `0.70710678118` (`Sin(45_deg)`) */
+    
+    /* takes two 32-bit Q12 fixed point coords around a circle */
+    unsigned int b = __agbabi_atan2(0x300, 0x400); /* returns a 15-bit binary angle measurement, where 0x4000 = 180 degrees or Pi radians */
+    /* `b` is roughly `0.927295` (`ArcTan2(0.25, 0.1875)`) */
+}
+```
+
 | Signature                                   | Description                             |
 |:--------------------------------------------|:----------------------------------------|
 | `int __agbabi_sin(int x)`                   | Fixed-point sine approximation          |
@@ -77,6 +91,8 @@ int main() {
 ## Coroutines
 
 ```c
+#include <agbabi.h>
+
 int my_coro_proc(__agbabi_coro_t* coro);
 
 int main() {
@@ -119,6 +135,8 @@ typedef struct {
 Requires RTC hardware. Time and date is in big-endian BCD format.
 
 ```c
+#include <agbabi.h>
+
 int main() {
     if (__agbabi_rtc_init() == 0) {
         unsigned int time = __agbabi_rtc_time();
@@ -145,6 +163,8 @@ int main() {
 
 ```c
 /* Example has a multiboot ROM binary at MY_MULTIBOOT_ROM */
+
+#include <agbabi.h>
 
 int on_clients_connected(int mask);
 int on_header_progress(int prog);

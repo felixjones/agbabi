@@ -10,7 +10,12 @@
 project('agbabi', 'c',
   version: '2.0.0',
   license: 'Zlib',
-  meson_version: '>=0.56.2')
+  meson_version: '>=0.56.2',
+  default_options: [
+    'buildtype=release',
+    'warning_level=3',
+    'c_std=c11',
+  ])
 
 sources_asm = [
   'source/context.s',
@@ -45,15 +50,13 @@ sources_c_thumb = [
 includes = ['include']
 
 c_args = [
-  '-O2',
   '-fomit-frame-pointer',
   '-ffunction-sections',
   '-fdata-sections',
-  '-Wall',
-  '-Wextra',
-  '-Wpedantic',
-  '-Wconversion',
 ]
+if get_option('warning_level') >= '3'
+  c_args += '-Wconversion'
+endif
 
 agbabi_asm = static_library('agbabi-asm',
   sources_asm,

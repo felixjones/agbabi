@@ -9,6 +9,12 @@
 
 cmake_minimum_required(VERSION 3.18)
 
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    # Default to Release build type
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
 project(agbabi ASM C)
 
 add_library(agbabi STATIC
@@ -38,12 +44,14 @@ add_library(agbabi STATIC
 
 set_source_files_properties(source/atan2.c PROPERTIES COMPILE_FLAGS "-marm")
 
+set_property(TARGET agbabi PROPERTY C_STANDARD 11)
+
 target_include_directories(agbabi PUBLIC include)
 target_compile_options(agbabi PRIVATE
     $<$<COMPILE_LANGUAGE:ASM>:
         "-Wa,-I${CMAKE_CURRENT_LIST_DIR}/source"
     >
-    $<$<COMPILE_LANGUAGE:C>: -mthumb -O2
+    $<$<COMPILE_LANGUAGE:C>: -mthumb
         -fomit-frame-pointer
         -ffunction-sections
         -fdata-sections

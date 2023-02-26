@@ -23,7 +23,7 @@ inline __attribute__((always_inline, const)) vec4u to_octant(int x, int y) {
     if (y < 0) {
         x = -x;
         y = -y;
-        octant = 0x4;
+        octant = 0x4000;
     }
 
     if (x <= 0) {
@@ -31,7 +31,7 @@ inline __attribute__((always_inline, const)) vec4u to_octant(int x, int y) {
 
         x = y;
         y = -temp;
-        octant |= 0x2;
+        octant |= 0x2000;
     }
 
     if (x <= y) {
@@ -39,7 +39,7 @@ inline __attribute__((always_inline, const)) vec4u to_octant(int x, int y) {
 
         x += y;
         y = temp;
-        octant |= 0x1;
+        octant |= 0x1000;
     }
 
     return (vec4u) {(unsigned int) x, (unsigned int) y, octant};
@@ -59,7 +59,7 @@ unsigned int __attribute__((section(".iwram.__agbabi_atan2"))) __agbabi_atan2(in
     dphi = 0x1F0B + ((temp2 * dphi) >> 15);
     dphi = 0x364C + ((temp2 * dphi) >> 15);
     dphi = 0xA2FC + ((temp2 * dphi) >> 15);
-    dphi *= temp >> 15;
+    dphi = (dphi * temp) >> 15;
 
-    return (x_y_phi[2] * 0x1000) + (unsigned int) ((dphi + 4) >> 3);
+    return x_y_phi[2] + (unsigned int) ((dphi + 4) >> 3);
 }

@@ -16,7 +16,7 @@
 
 #include <agbabi.h>
 #include <reent.h>
-#include <time.h>
+#include <sys/time.h>
 
 #define RTC_OK      (0x00)
 #define RTC_EPOWER  (0x01)
