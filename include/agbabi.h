@@ -136,6 +136,11 @@ void __agbabi_fiq_memcpy4(void *__restrict__ dest, const void *__restrict__ src,
  */
 void __agbabi_fiq_memcpy4x4(void *__restrict__ dest, const void *__restrict__ src, size_t n) __attribute__((nonnull(1, 2)));
 
+/**
+ * Coroutine state
+ * @param arm_sp Pointer to coroutine stack
+ * @param joined Flag if the coroutine has joined
+ */
 typedef struct __agbabi_coro_t {
     unsigned int arm_sp : 31;
     unsigned int joined : 1;
@@ -234,8 +239,20 @@ unsigned long long __attribute__((vector_size(sizeof(unsigned long long) * 2))) 
  */
 unsigned long long __attribute__((vector_size(sizeof(unsigned long long) * 2))) __agbabi_unsafe_uluidivmod(unsigned long long numerator, unsigned int denominator) __attribute__((const));
 
+/**
+ * Multiboot parameters
+ * All callbacks must return 0 to continue, or non-zero to cancel
+ * @param header Pointer to 192 bytes of header data
+ * @param begin Pointer to start of Multiboot ROM data
+ * @param end Pointer to end of Multiboot ROM data
+ * @param palette 8-bit index of Multiboot animation
+ * @param clients_connected Callback with a mask of which clients are connected
+ * @param clients_connected Callback with a mask of which clients are connected
+ * @param palette_progress Mask of which clients are waiting to receive palette data
+ * @param accept Callback to confirm sending Multiboot ROM
+ */
 typedef struct {
-    const unsigned short *header __attribute__((bounded(sizeof(unsigned short) * 96)));
+    const void* header;
     const void* begin;
     const void* end;
     int palette;
@@ -245,6 +262,12 @@ typedef struct {
     int(*accept)();
 } __agbabi_multiboot_t;
 
+/**
+ * Send Multiboot data over serial IO
+ * IRQs must first be disabled
+ * @param param Pointer to __agbabi_multiboot_t
+ * @return 0 on success, 1 on failure with errno set to the error code
+ */
 int __agbabi_multiboot(const __agbabi_multiboot_t* param) __attribute__((nonnull(1)));
 
 #ifdef __cplusplus

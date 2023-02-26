@@ -96,7 +96,7 @@ int __agbabi_multiboot(const __agbabi_multiboot_t* param) {
         return 1;
     }
 
-    const u16* rom16 = param->header;
+    const u16* rom16 = (const u16*) param->header;
     for (int halves = 0; halves < 0x60; ++halves) {
         response = mb_send(*rom16++);
 
