@@ -8,7 +8,7 @@
 #===============================================================================
 
 project('agbabi', 'c',
-  version: '2.1.0',
+  version: '2.1.1',
   license: 'Zlib',
   meson_version: '>=0.56.2',
   default_options: [
@@ -78,3 +78,10 @@ agbabi = static_library('agbabi',
     agbabi_arm.extract_all_objects(recursive: false),
     agbabi_thumb.extract_all_objects(recursive: false)
   ])
+
+agbabi_dep = declare_dependency(
+  include_directories: includes,
+  link_with: agbabi,
+  version: meson.project_version())
+
+meson.override_dependency('agbabi', agbabi_dep)
