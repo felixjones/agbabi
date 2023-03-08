@@ -8,7 +8,7 @@
 #===============================================================================
 
 project('agbabi', 'c',
-  version: '2.1.1',
+  version: '2.1.2',
   license: 'Zlib',
   meson_version: '>=0.56.2',
   default_options: [
