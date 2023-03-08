@@ -43,7 +43,8 @@ __aeabi_memset:
     joaobapt_test r3
     strmib  r2, [r0], #1
     submi   r1, r1, #1
-    strcsh  r2, [r0], #2
+    strcsb  r2, [r0], #1
+    strcsb  r2, [r0], #1
     subcs   r1, r1, #2
 
     .global __aeabi_memset8
