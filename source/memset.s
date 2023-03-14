@@ -75,8 +75,8 @@ __agbabi_lwordset4:
     mov     r9, r3
 
 .Lset_8_words:
-    stmgeia r0!, {r2-r9}
     subs    r1, r1, #32
+    stmgeia r0!, {r2-r9}
     bgt     .Lset_8_words
     pop     {r4-r9}
     bxeq    lr
