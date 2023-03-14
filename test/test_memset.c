@@ -82,6 +82,17 @@ AGBTEST(memset, big_offset_3) {
                   't', 'u', 'v', 'w', 'x', 'y', 'z');
 }
 
+AGBTEST(memset, very_big_offset_1) {
+    char b[130];
+    fill_ascii_buffer(b, 130, 'a');
+
+    __aeabi_memset(&b[1], 128, '?');
+    ASSERT_EQUAL(b[0], 'a');
+    ASSERT_EQUAL(b[1], '?');
+    ASSERT_EQUAL(b[128], '?');
+    ASSERT_EQUAL(b[129], 'z');
+}
+
 void fill_ascii_buffer(void* buf, size_t len, char base) {
     char* b = (char*) buf;
     for (size_t i = 0; i < len; ++i) {
