@@ -17,10 +17,12 @@
     @ after it, r0:r1 has the quotient and r2 has the modulo. r3 = 0 to be compatible with uldivmod
     .section .iwram.__agbabi_uluidivmod, "ax", %progbits
     .global __agbabi_uluidivmod
+    .type __agbabi_uluidivmod, %function
 __agbabi_uluidivmod:
     @ Fallthrough
 
     .global __agbabi_uluidiv
+    .type __agbabi_uluidiv, %function
 __agbabi_uluidiv:
 
     @ Check for division by zero
@@ -30,6 +32,7 @@ __agbabi_uluidiv:
     @ Fallthrough
 
     .global __agbabi_unsafe_uluidivmod
+    .type __agbabi_unsafe_uluidivmod, %function
 __agbabi_unsafe_uluidivmod:
     @ If the second word is 0, just do normal 32x32 division
     cmp     r1, #0

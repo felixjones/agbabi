@@ -15,10 +15,12 @@
 
     .section .iwram.__aeabi_uidivmod, "ax", %progbits
     .global __aeabi_uidivmod
+    .type __aeabi_uidivmod, %function
 __aeabi_uidivmod:
     @ Fallthrough
 
     .global __aeabi_uidiv
+    .type __aeabi_uidiv, %function
 __aeabi_uidiv:
 
     @ Check for division by zero
@@ -28,6 +30,7 @@ __aeabi_uidiv:
     @ Fallthrough
 
     .global __agbabi_unsafe_uidivmod
+    .type __agbabi_unsafe_uidivmod, %function
 __agbabi_unsafe_uidivmod:
     @ If n < d, just bail out as well
     cmp     r0, r1    @ n, d

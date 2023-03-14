@@ -22,6 +22,7 @@
 
     .section .iwram.getcontext, "ax", %progbits
     .global getcontext
+    .type getcontext, %function
 getcontext:
     @ Save r0
     str     r0, [r0, #OFF_REG_R0]

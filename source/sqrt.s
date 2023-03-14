@@ -13,6 +13,7 @@
 
     .section .iwram.__agbabi_sqrt, "ax", %progbits
     .global __agbabi_sqrt
+    .type __agbabi_sqrt, %function
 __agbabi_sqrt:
     mov     r1, #3 << 30
     mov     r2, #1 << 30

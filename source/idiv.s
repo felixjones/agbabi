@@ -15,10 +15,12 @@
     @ after it, r0 has the quotient and r1 has the modulo
     .section .iwram.__aeabi_idivmod, "ax", %progbits
     .global __aeabi_idivmod
+    .type __aeabi_idivmod, %function
 __aeabi_idivmod:
     @ Fallthrough
 
     .global __aeabi_idiv
+    .type __aeabi_idiv, %function
 __aeabi_idiv:
     @ Test division by zero
     cmp     r1, #0
