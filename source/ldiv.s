@@ -17,10 +17,12 @@
     @ after it, r0:r1 has the quotient and r2:r3 has the modulo
     .section .iwram.__aeabi_ldivmod, "ax", %progbits
     .global __aeabi_ldivmod
+    .type __aeabi_ldivmod, %function
 __aeabi_ldivmod:
     @ Fallthrough
 
     .global __agbabi_ldiv
+    .type __agbabi_ldiv, %function
 __agbabi_ldiv:
     @ Test division by zero
     cmp     r3, #0

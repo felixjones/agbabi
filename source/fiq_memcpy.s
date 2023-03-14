@@ -15,6 +15,7 @@
 
     .section .iwram.__agbabi_fiq_memcpy4, "ax", %progbits
     .global __agbabi_fiq_memcpy4
+    .type __agbabi_fiq_memcpy4, %function
 __agbabi_fiq_memcpy4:
     cmp     r2, #48
     blt     .Lcopy_words
@@ -61,6 +62,7 @@ __agbabi_fiq_memcpy4:
 
     .section .iwram.__agbabi_fiq_memcpy4x4, "ax", %progbits
     .global __agbabi_fiq_memcpy4x4
+    .type __agbabi_fiq_memcpy4x4, %function
 __agbabi_fiq_memcpy4x4:
     push    {r4-r10}
     cmp     r2, #48

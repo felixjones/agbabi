@@ -13,6 +13,7 @@
 
     .section .iwram.__agbabi_coro_resume, "ax", %progbits
     .global __agbabi_coro_resume
+    .type __agbabi_coro_resume, %function
 __agbabi_coro_resume:
     push    {r4-r11, lr}
     mov     r1, sp
@@ -26,6 +27,7 @@ __agbabi_coro_resume:
 
     .section .iwram.__agbabi_coro_yield, "ax", %progbits
     .global __agbabi_coro_yield
+    .type __agbabi_coro_yield, %function
 __agbabi_coro_yield:
     push    {r4-r11, lr}
     mov     r2, sp
@@ -40,6 +42,7 @@ __agbabi_coro_yield:
 
     .section .iwram.__agbabi_coro_pop, "ax", %progbits
     .global __agbabi_coro_pop
+    .type __agbabi_coro_pop, %function
 __agbabi_coro_pop:
     ldr     r1, [sp, #4]
 

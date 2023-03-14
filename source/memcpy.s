@@ -19,6 +19,7 @@
 
     .section .iwram.__aeabi_memcpy, "ax", %progbits
     .global __aeabi_memcpy
+    .type __aeabi_memcpy, %function
 __aeabi_memcpy:
     @ >6-bytes is roughly the threshold when byte-by-byte copy is slower
     cmp     r2, #6
@@ -43,8 +44,10 @@ __aeabi_memcpy:
     @ r0, r1 are now word aligned
 
     .global __aeabi_memcpy8
+    .type __aeabi_memcpy8, %function
 __aeabi_memcpy8:
     .global __aeabi_memcpy4
+    .type __aeabi_memcpy4, %function
 __aeabi_memcpy4:
     cmp     r2, #32
     blt     .Lcopy_words
@@ -92,6 +95,7 @@ __aeabi_memcpy4:
     @ r0, r1 are now half aligned
 
     .global __agbabi_memcpy2
+    .type __agbabi_memcpy2, %function
 __agbabi_memcpy2:
     subs    r2, r2, #2
     ldrgeh  r3, [r1], #2
@@ -106,6 +110,7 @@ __agbabi_memcpy2:
     bx      lr
 
     .global __agbabi_memcpy1
+    .type __agbabi_memcpy1, %function
 __agbabi_memcpy1:
     subs    r2, r2, #1
     ldrgeb  r3, [r1], #1
@@ -115,6 +120,7 @@ __agbabi_memcpy1:
 
     .section .iwram.memcpy, "ax", %progbits
     .global memcpy
+    .type memcpy, %function
 memcpy:
     push    {r0, lr}
     bl      __aeabi_memcpy

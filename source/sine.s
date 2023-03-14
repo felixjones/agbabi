@@ -13,6 +13,7 @@
 
     .section .iwram.__agbabi_sin, "ax", %progbits
     .global __agbabi_sin
+    .type __agbabi_sin, %function
 __agbabi_sin:
     mov     r0, r0, lsl #17
     teq     r0, r0, lsl #1

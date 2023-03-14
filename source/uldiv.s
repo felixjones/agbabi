@@ -21,10 +21,12 @@
     .align 2
     .arm
     .global __aeabi_uldivmod
+    .type __aeabi_uldivmod, %function
 __aeabi_uldivmod:
     @ Fallthrough
 
     .global __agbabi_uldiv
+    .type __agbabi_uldiv, %function
 __agbabi_uldiv:
     @ Check if the high word of the denominator is zero
     cmp     r3, #0
@@ -33,6 +35,7 @@ __agbabi_uldiv:
     @ Fallthrough
 
     .global __agbabi_unsafe_uldivmod
+    .type __agbabi_unsafe_uldivmod, %function
 __agbabi_unsafe_uldivmod:
     @ Check if the denominator is greater than the numerator and exit early if so
     cmp     r1, r3

@@ -15,6 +15,7 @@
 
     .section .iwram.__agbabi_rmemcpy, "ax", %progbits
     .global __agbabi_rmemcpy
+    .type __agbabi_rmemcpy, %function
 __agbabi_rmemcpy:
     @ >6-bytes is roughly the threshold when byte-by-byte copy is slower
     cmp     r2, #6
@@ -96,6 +97,7 @@ __agbabi_rmemcpy:
     bx      lr
 
     .global __agbabi_rmemcpy1
+    .type __agbabi_rmemcpy1, %function
 __agbabi_rmemcpy1:
     subs    r2, r2, #1
     ldrgeb  r3, [r1, r2]

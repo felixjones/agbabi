@@ -19,6 +19,7 @@
 
     .section .iwram.__agbabi_irq_empty, "ax", %progbits
     .global __agbabi_irq_empty
+    .type __agbabi_irq_empty, %function
 __agbabi_irq_empty:
     mov     r0, #REG_BASE
 
@@ -38,6 +39,7 @@ __agbabi_irq_empty:
 
     .section .iwram.__agbabi_irq_user,"ax",%progbits
     .global __agbabi_irq_user
+    .type __agbabi_irq_user, %function
 __agbabi_irq_user:
     mov     r1, #REG_BASE
 
