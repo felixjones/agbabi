@@ -97,9 +97,7 @@ __agbabi_lwordset4:
     @ Set tail
     joaobapt_test r1
     strcsh  r2, [r0], #2
-    subcs   r1, r1, #2
     strmib  r2, [r0], #1
-    submi   r1, r1, #1
     bx      lr
 
     .global __agbabi_memset1
