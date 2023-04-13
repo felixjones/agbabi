@@ -18,8 +18,9 @@ __agbabi_coro_resume:
     push    {r4-r11, lr}
     mov     r1, sp
 
-    ldr     sp, [r0]
-    bic     sp, sp, #0x80000000
+    ldr     r2, [r0]
+    bic     r2, r2, #0x80000000
+    mov     sp, r2
     pop     {r4-r11, lr}
     str     r1, [r0]
 
