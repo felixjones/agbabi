@@ -130,6 +130,26 @@ typedef struct {
 } __agbabi_coro_t;
 ```
 
+### Restarting a joined coroutine
+
+Calling `__agbabi_coro_resume` on a coroutine with the `joined` flag set will clear the `joined` flag and restart the coroutine.
+
+```c
+__agbabi_coro_t coro;
+/* __agbabi_coro_make */
+
+while (coro.joined == 0) {
+    __agbabi_coro_resume(&coro);
+}
+/* coro.joined is now 1 */
+
+if (coro.joined == 1) {
+    /* Restart coro */
+    __agbabi_coro_resume(&coro);
+    /* coro.joined is now 0 */
+}
+```
+
 ## Real-time clock
 
 Requires RTC hardware. Time and date is in big-endian BCD format.
