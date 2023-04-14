@@ -44,7 +44,7 @@ add_library(agbabi STATIC
 
 set_source_files_properties(source/atan2.c PROPERTIES COMPILE_FLAGS "-marm")
 
-set_property(TARGET agbabi PROPERTY C_STANDARD 11)
+target_compile_features(agbabi PRIVATE c_std_11)
 
 target_include_directories(agbabi PUBLIC include)
 target_compile_options(agbabi PRIVATE
@@ -59,6 +59,7 @@ target_compile_options(agbabi PRIVATE
         -Wextra
         -Wpedantic
         -Wconversion
+        -Wstrict-prototypes
     >
 )
 
