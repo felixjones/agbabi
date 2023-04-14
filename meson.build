@@ -56,6 +56,7 @@ c_args = [
 ]
 if get_option('warning_level') == '3'
   c_args += '-Wconversion'
+  c_args += '-Wstrict-prototypes'
 endif
 
 agbabi_asm = static_library('agbabi-asm',
