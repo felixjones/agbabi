@@ -43,6 +43,7 @@ sources_c_arm = [
 sources_c_thumb = [
   'source/context.c',
   'source/coroutine.c',
+  'source/ewram.c',
   'source/multiboot.c',
   'source/rtc.c',
 ]

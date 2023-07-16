@@ -230,16 +230,15 @@ int __agbabi_multiboot(const __agbabi_multiboot_t* param) {
     mbp.boot_endp = param->end;
 
     /* MultiBoot */
-    int res;
+    register int res __asm__("r0");
     __asm__ volatile (
         "mov     r0, %[mbp]"                    "\n\t"
         "mov     r1, #0"                        "\n\t"
         "swi     0x25 << ((1f - . == 4) * -16)" "\n\t"
-        "1:"                                    "\n\t"
-        "mov     %[res], r0"
+        "1:"
         : [res]"=l"(res)
         : [mbp]"l"(&mbp)
-        : "r0", "r1", "r3"
+        : "r1", "r3"
     );
 
     if (res) {

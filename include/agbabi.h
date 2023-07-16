@@ -285,6 +285,12 @@ typedef struct {
  */
 int __agbabi_multiboot(const __agbabi_multiboot_t* param) __attribute__((nonnull(1)));
 
+/**
+ * Check EWRAM speed
+ * @return 0 for slow WRAM (OXY, NTR), 1 for fast EWRAM (AGB, AGS)
+ */
+int __agbabi_poll_ewram(void) __attribute__((const));
+
 #ifdef __cplusplus
 }
 #endif

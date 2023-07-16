@@ -21,6 +21,7 @@ add_library(agbabi STATIC
     source/atan2.c
     source/context.c
     source/coroutine.c
+    source/ewram.c
     source/multiboot.c
     source/rtc.c
 

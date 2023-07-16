@@ -250,3 +250,26 @@ typedef struct {
     int(*accept)();
 } __agbabi_multiboot_t;
 ```
+
+## EWRAM Overclock
+
+Checks if EWRAM is compatible with `REG_MEMCNT` set to `0x0E000020`.
+
+Interrupts are disabled during the hardware test.
+
+```c
+#include <agbabi.h>
+
+#define REG_MEMCTL (*(volatile int*) 0x4000800)
+
+int main() {
+    if (__agbabi_poll_ewram()) {
+        /* It is (probably) safe to activate fast EWRAM */
+        REG_MEMCTL = 0x0E000020;
+    }
+}
+```
+
+| Signature                   | Description                                |
+|:----------------------------|:-------------------------------------------|
+| `int __agbabi_poll_ewram()` | Returns 1 for fast EWRAM, 0 for slow EWRAM |
