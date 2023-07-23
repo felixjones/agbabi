@@ -260,12 +260,12 @@ Interrupts are disabled during the hardware test.
 ```c
 #include <agbabi.h>
 
-#define REG_MEMCTL (*(volatile int*) 0x4000800)
+#define REG_MEMCNT (*(volatile int*) 0x4000800)
 
 int main() {
     if (__agbabi_poll_ewram()) {
         /* It is (probably) safe to activate fast EWRAM */
-        REG_MEMCTL = 0x0E000020;
+        REG_MEMCNT = 0x0E000020;
     }
 }
 ```
