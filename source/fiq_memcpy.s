@@ -7,7 +7,7 @@
 @ For conditions of distribution and use, see copyright notice in LICENSE.md
 @
 @===============================================================================
-
+.syntax unified
 .include "macros.inc"
 
     .arm
@@ -31,8 +31,8 @@ __agbabi_fiq_memcpy4:
 
 .Lloop_48:
     subs    r2, r2, #48
-    ldmgeia r1!, {r3-r14}
-    stmgeia r0!, {r3-r14}
+    ldmiage r1!, {r3-r14}
+    stmiage r0!, {r3-r14}
     bgt     .Lloop_48
 
     @ Exit FIQ mode
@@ -53,11 +53,11 @@ __agbabi_fiq_memcpy4:
     @ Copy byte & half tail
     joaobapt_test r2
     @ Copy half
-    ldrcsh  r3, [r1], #2
-    strcsh  r3, [r0], #2
+    ldrhcs  r3, [r1], #2
+    strhcs  r3, [r0], #2
     @ Copy byte
-    ldrmib  r3, [r1]
-    strmib  r3, [r0]
+    ldrbmi  r3, [r1]
+    strbmi  r3, [r0]
     bx      lr
 
     .section .iwram.__agbabi_fiq_memcpy4x4, "ax", %progbits
@@ -77,8 +77,8 @@ __agbabi_fiq_memcpy4x4:
 
 .Lloop_48_4x4:
     subs    r2, r2, #48
-    ldmgeia r1!, {r3-r14}
-    stmgeia r0!, {r3-r14}
+    ldmiage r1!, {r3-r14}
+    stmiage r0!, {r3-r14}
     bgt     .Lloop_48_4x4
 
     @ Exit FIQ mode
@@ -88,10 +88,10 @@ __agbabi_fiq_memcpy4x4:
 .Lcopy_tail_4x4:
     @ JoaoBapt test 48-bytes
     joaobapt_test_lsl r2, #27
-    ldmcsia r1!, {r3-r10}
-    stmcsia r0!, {r3-r10}
-    ldmmiia r1!, {r3-r6}
-    stmmiia r0!, {r3-r6}
+    ldmiacs r1!, {r3-r10}
+    stmiacs r0!, {r3-r10}
+    ldmiami r1!, {r3-r6}
+    stmiami r0!, {r3-r6}
 
     pop     {r4-r10}
     bx      lr

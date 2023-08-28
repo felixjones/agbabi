@@ -7,6 +7,7 @@
 @ For conditions of distribution and use, see copyright notice in LICENSE.md
 @
 @===============================================================================
+.syntax unified
 
 .set OFF_MCONTEXT,  16
 .set OFF_REG_R0,    OFF_MCONTEXT + 0

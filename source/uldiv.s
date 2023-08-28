@@ -9,6 +9,7 @@
 @ Modified for libagbabi
 @
 @===============================================================================
+.syntax unified
 
     .arm
     .align 2
@@ -55,31 +56,31 @@ __agbabi_unsafe_uldivmod:
     @ r4:r1 (in that order) is the denominator
     @ Build counter for optimization
     mov     r5, #30                 @ first guess on difference
-    mov     r3, r2, lsr #2
+    lsr     r3, r2, #2
 
     @ Iterate four times to get the counter up to 4-bit precision
     cmn     r1, r3, lsr #14     @ if denom <= (r1 >> 12)
     subge   r5, r5, #16         @ then -denom >= -(r1 >> 12)
-    movge   r3, r3, lsr #16
+    lsrge   r3, r3, #16
 
     cmn     r1, r3, lsr #6
     subge   r5, r5, #8
-    movge   r3, r3, lsr #8
+    lsrge   r3, r3, #8
 
     cmn     r1, r3, lsr #2
     subge   r5, r5, #4
-    movge   r3, r3, lsr #4
+    lsrge   r3, r3, #4
 
     cmn     r1, r3
     subge   r5, r5, #2
-    movge   r3, r3, lsr #2
+    lsrge   r3, r3, #2
 
     @ shift the rest of the numerator by the counter
-    mov     r2, r2, lsl r5          @ r1 << r3
+    lsl     r2, r2, r5              @ r1 << r3
     rsb     r5, r5, #32
     orr     r2, r2, r0, lsr r5      @ r1 << r3 | (r0 >> (32-r3))
     rsb     r5, r5, #32
-    mov     r0, r0, lsl r5          @ r0 << r3 - correctly set up
+    lsl     r0, r0, r5              @ r0 << r3 - correctly set up
     adds    r0, r0, r0              @ bump r0 a first time
 
     @ dynamically jump to the exact copy of the iteration

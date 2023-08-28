@@ -9,6 +9,7 @@
 @ Modified for libagbabi
 @
 @===============================================================================
+.syntax unified
 
     .arm
     .align 2
@@ -44,23 +45,23 @@ __agbabi_unsafe_uidivmod:
     @ From now on: r0 = quot/num, r1 = mod, r2 = denom, r3 = counter
     mov     r2, r1
     mov     r3, #28             @ first guess on difference
-    mov     r1, r0, lsr #4      @ r1 = num >> 4
+    lsr     r1, r0, #4          @ r1 = num >> 4
 
     @ Iterate three times to get the counter up to 4-bit precision
     cmp     r2, r1, lsr #12
     suble   r3, r3, #16
-    movle   r1, r1, lsr #16
+    lsrle   r1, r1, #16
 
     cmp     r2, r1, lsr #4
     suble   r3, r3, #8
-    movle   r1, r1, lsr #8
+    lsrle   r1, r1, #8
 
     cmp     r2, r1
     suble   r3, r3, #4
-    movle   r1, r1, lsr #4
+    lsrle   r1, r1, #4
 
     @ shift the numerator by the counter and flip the sign of the denom
-    mov     r0, r0, lsl r3
+    lsl     r0, r0, r3
     adds    r0, r0, r0
     rsb     r2, r2, #0
 
