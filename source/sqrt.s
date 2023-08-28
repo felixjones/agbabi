@@ -8,6 +8,8 @@
 @
 @===============================================================================
 
+.syntax unified
+
     .arm
     .align 2
 
@@ -20,13 +22,13 @@ __agbabi_sqrt:
 
     @ Jump forward if input is within 1/2/3 bytes
     @ 8-bit check
-    movs    r3, r0, lsr #8
+    lsrs    r3, r0, #8
     addeq   pc, pc, #(48 * 3) + 12
     @ 16-bit check
-    movs    r3, r0, lsr #16
+    lsrs    r3, r0, #16
     addeq   pc, pc, #(48 * 2) + 4
     @ 24-bit check
-    movs    r3, r0, lsr #24
+    lsrs    r3, r0, #24
     addeq   pc, pc, #(48 * 1) - 4
 
     .set i, 0

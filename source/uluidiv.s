@@ -8,6 +8,8 @@
 @
 @===============================================================================
 
+.syntax unified
+
     .arm
     .align 2
 
@@ -45,28 +47,28 @@ __agbabi_unsafe_uluidivmod:
     push    {r4}
     rsb     r3, r2, #0
     mov     r4, #28             @ first guess on difference
-    mov     r2, r1, lsr #4      @ r2 = high(num) >> 4
+    lsr     r2, r1, #4          @ r2 = high(num) >> 4
 
     @ Iterate three times to get the counter up to 4-bit precision
     cmn     r3, r2, lsr #12     @ if denom <= (r1 >> 12)
     subge   r4, r4, #16         @ then -denom >= -(r1 >> 12)
-    movge   r2, r2, lsr #16
+    lsrge   r2, r2, #16
 
     cmn     r3, r2, lsr #4
     subge   r4, r4, #8
-    movge   r2, r2, lsr #8
+    lsrge   r2, r2, #8
 
     cmn     r3, r2
     subge   r4, r4, #4
-    movge   r2, r2, lsr #4
+    lsrge   r2, r2, #4
 
     @ shift the numerator by the counter
     @ the trick here not to use a lot of registers is to do it with care
-    mov     r1, r1, lsl r4          @ r1 << r4
+    lsl     r1, r1, r4              @ r1 << r4
     rsb     r4, r4, #32
     orr     r1, r1, r0, lsr r4      @ r1 << r4 | (r0 >> (32-r4))
     rsb     r4, r4, #32
-    mov     r0, r0, lsl r4          @ r0 << r4 - correctly set up
+    lsl     r0, r0, r4              @ r0 << r4 - correctly set up
     adds    r0, r0, r0              @ bump r0 a first time
     adcs    r1, r1, r1
 

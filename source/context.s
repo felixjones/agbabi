@@ -8,6 +8,8 @@
 @
 @===============================================================================
 
+.syntax unified
+
 .set OFF_MCONTEXT,  16
 .set OFF_REG_R0,    OFF_MCONTEXT + 0
 .set OFF_REG_R1,    OFF_MCONTEXT + 4
