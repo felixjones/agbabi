@@ -7,6 +7,7 @@
 @ For conditions of distribution and use, see copyright notice in LICENSE.md
 @
 @===============================================================================
+
 .syntax unified
 
 .set REG_BIOSIF, 0x3FFFFF8
