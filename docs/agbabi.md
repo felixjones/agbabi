@@ -273,3 +273,28 @@ int main() {
 | Signature                   | Description                                |
 |:----------------------------|:-------------------------------------------|
 | `int __agbabi_poll_ewram()` | Returns 1 for fast EWRAM, 0 for slow EWRAM |
+
+## Mode 4 Column Unpack/Pack
+
+Pixel buffer column pack/unpack utilities for Mode 4 video memory (240 pixels wide, 8 bits per pixel).
+
+### 4x Columns
+
+Packs/unpacks 4 columns of pixel data at a time.
+
+```c
+#include <agbabi.h>
+
+#define VIDEO4_VRAM (*(char*) 0x6000000)
+
+int main() {
+    char columnBuffer[160][4];
+    __agbabi_m4col_unpack4(columnBuffer, VIDEO4_VRAM + 4, 160); /* Read 4x160 pixels into columnBuffer, starting at column 4 */
+    __agbabi_m4col_pack4(VIDEO4_VRAM + 8, columnBuffer, 160); /* Write 4x160 pixels from columnBuffer, starting at column 8 */
+}
+```
+
+| Signature                                                            | Description                                                                                            |
+|:---------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------|
+| `void __agbabi_m4col_pack4(void* dest, const void* src, size_t n)`   | Packs n rows of 4 columns of pixels from src into dest<br/>Assumes n is non-zero and a multiple of 4   |
+| `void __agbabi_m4col_unpack4(void* dest, const void* src, size_t n)` | Unpacks n rows of 4 columns of pixels from src into dest<br/>Assumes n is non-zero and a multiple of 4 |

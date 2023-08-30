@@ -32,6 +32,7 @@ add_library(agbabi STATIC
     source/irq.s
     source/ldiv.s
     source/lmul.s
+    source/m4column.s
     source/memcpy.s
     source/memmove.s
     source/memset.s
