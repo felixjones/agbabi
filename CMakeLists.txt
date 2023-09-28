@@ -49,6 +49,7 @@ target_compile_features(agbabi PRIVATE c_std_11)
 
 target_include_directories(agbabi PUBLIC include)
 target_compile_options(agbabi PRIVATE
+    -masm-syntax-unified
     $<$<COMPILE_LANGUAGE:ASM>:
         "-Wa,-I${CMAKE_CURRENT_LIST_DIR}/source"
     >

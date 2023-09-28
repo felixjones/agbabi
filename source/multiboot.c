@@ -232,8 +232,8 @@ int __agbabi_multiboot(const __agbabi_multiboot_t* param) {
     /* MultiBoot */
     register int res __asm__("r0");
     __asm__ volatile (
-        "mov     r0, %[mbp]"                    "\n\t"
-        "mov     r1, #0"                        "\n\t"
+        "movs    r0, %[mbp]"                    "\n\t"
+        "movs    r1, #0"                        "\n\t"
         "swi     0x25 << ((1f - . == 4) * -16)" "\n\t"
         "1:"
         : [res]"=l"(res)

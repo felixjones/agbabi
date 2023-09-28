@@ -158,15 +158,15 @@ unsigned int gpio_read(int n) {
 
     for (int i = 0; i < n; ++i) {
         __asm__ volatile (
-            "lsr     %[res], %[res], #1"            "\n\t"
+            "lsrs    %[res], %[res], #1"            "\n\t"
             "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
             "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
             "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
             "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
             "strh    %[b101], [%[GPIO_PORT_DATA]]"  "\n\t"
             "ldrh    r7, [%[GPIO_PORT_DATA]]"       "\n\t"
-            "lsl     r7, #30"                       "\n\t"
-            "orr     %[res], %[res], r7"
+            "lsls    r7, #30"                       "\n\t"
+            "orrs    %[res], %[res], r7"
             :   [res]"+l"(result)
             :   [GPIO_PORT_DATA]"l"(ADDR_GPIO_PORT_DATA),
                 [b100]"l"(0x4),
