@@ -8,7 +8,7 @@
 #===============================================================================
 
 project('agbabi', 'c',
-  version: '2.1.4',
+  version: '2.1.5',
   license: 'Zlib',
   meson_version: '>=0.56.2',
   default_options: [
@@ -51,6 +51,7 @@ sources_c_thumb = [
 includes = ['include']
 
 c_args = [
+  '-masm-syntax-unified',
   '-fomit-frame-pointer',
   '-ffunction-sections',
   '-fdata-sections',
@@ -62,7 +63,7 @@ endif
 
 agbabi_asm = static_library('agbabi-asm',
   sources_asm,
-  c_args: ['-Wa,-I' + meson.current_source_dir() + '/source'])
+  c_args: ['-masm-syntax-unified', '-Wa,-I' + meson.current_source_dir() + '/source'])
 
 agbabi_arm = static_library('agbabi-arm',
   sources_c_arm,
