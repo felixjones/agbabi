@@ -51,7 +51,7 @@ int __agbabi_poll_ewram(void) {
     *ADDR_MEMCNT = 0x0E000020;
 
     for (u32 i = 0; i < EWRAM_TEST_LEN; ++i) {
-        const u16 test = memory[i] + FRAC_PI;
+        const u16 test = (u16) (memory[i] + FRAC_PI);
 
         ADDR_EWRAM[i] = test;
         if (ADDR_EWRAM[i] != test) {
