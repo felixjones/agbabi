@@ -18,239 +18,307 @@
 #include <reent.h>
 #include <sys/time.h>
 
-#define RTC_OK      (0x00)
-#define RTC_EPOWER  (0x01)
-#define RTC_E12HOUR (0x02)
-#define RTC_EYEAR   (0x03)
-#define RTC_EMON    (0x04)
-#define RTC_EDAY    (0x05)
-#define RTC_EWDAY   (0x06)
-#define RTC_EHOUR   (0x07)
-#define RTC_EMIN    (0x08)
-#define RTC_ESEC    (0x09)
+/* MMIO registers */
+#define MMIO_IME               ((volatile short*) 0x4000208)
+#define MMIO_GPIO_DATA         ((volatile short*) 0x80000c4)
+#define MMIO_GPIO_WRITE_ENABLE ((volatile short*) 0x80000c6)
+#define MMIO_GPIO_ENABLE       ((volatile short*) 0x80000c8)
 
-#define RTC_INTFE   (0x01)
-#define RTC_INTME   (0x02)
-#define RTC_INTAE   (0x04)
-#define RTC_24HOUR  (0x40)
-#define RTC_POWER   (0x80)
+/* RTC pins */
+#define RTC_CS   (0x4)
+#define RTC_DATA (0x2)
+#define RTC_SCK  (0x1)
 
-#define RTC_TEST (0x80)
+/* RTC command helpers */
+#define MAKE_WRITE_CMD(cmd) (0x60 | cmd << 1)
+#define MAKE_READ_CMD(cmd)  (0x61 | cmd << 1)
 
-#define CMD_RESET           (0x06)
-#define CMD_DATETIME_WRITE  (0x26)
-#define CMD_STATUS_WRITE    (0x46)
-#define CMD_TIME_WRITE      (0x66)
-#define CMD_DATETIME_READ   (0xa6)
-#define CMD_STATUS_READ     (0xc6)
-#define CMD_TIME_READ       (0xe6)
+/* Status flags */
+#define STAT_INTFE  (0x02)
+#define STAT_INTME  (0x08)
+#define STAT_INTAE  (0x20)
+#define STAT_24HOUR (0x40)
+#define STAT_POWER  (0x80)
 
-typedef unsigned short u16;
-typedef volatile u16 vu16;
+/* Time flags */
+#define TM_TEST (0x80)
 
-#define ADDR_IME            ((vu16*) 0x4000208)
-#define ADDR_GPIO_PORT_DATA ((vu16*) 0x80000c4)
-#define ADDR_GPIO_PORT_DIR  ((vu16*) 0x80000c6)
-#define ADDR_GPIO_PORT_CNT  ((vu16*) 0x80000c8)
+/* Init results */
+#define INIT_OK      (0x00)
+#define INIT_EPOWER  (0x01)
+#define INIT_E12HOUR (0x02)
 
-static unsigned int gpio_read(int n);
-static void gpio_write(unsigned int x, int n);
+/* Compiler hacks */
+#define assume(cond) do { if (!(cond)) __builtin_unreachable(); } while (0)
+#define unlikely(cond) __builtin_expect(!!(cond), 0)
 
-static unsigned int rtc_status(void);
+static unsigned int rtc_read(unsigned int len);
+static void rtc_cmd(unsigned int cmd);
+static void rtc_cmd_arg(unsigned int cmd, unsigned int data, unsigned int len);
+static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime);
 static void rtc_reset(void);
+static unsigned int rtc_get_status(void);
+static void rtc_set_status_24hr(void);
 
 static int bcd_decode(unsigned int x) __attribute__((const));
 static unsigned int bcd_encode(int x) __attribute__((const));
 
-#define unlikely(x) __builtin_expect(!!(x), 0)
+static unsigned int rtc_read(unsigned int len) {
+    assume(len > 0 && len <= 32);
+    unsigned int data = 0;
 
-int __agbabi_rtc_init(void) {
-    *ADDR_GPIO_PORT_CNT = 1;
-    unsigned int status = rtc_status();
-
-    if (unlikely((status & RTC_POWER) == RTC_POWER || (status & RTC_24HOUR) == 0)) {
-        rtc_reset();
-    }
-
-    const unsigned int time = __agbabi_rtc_time();
-
-    if (time & RTC_TEST) {
-        rtc_reset(); /* Reset to leave test mode */
-    }
-
-    status = rtc_status();
-
-    if (unlikely((status & RTC_POWER) == RTC_POWER)) {
-        return RTC_EPOWER;
-    }
-
-    if (unlikely((status & RTC_24HOUR) == 0)) {
-        return RTC_E12HOUR;
-    }
-
-    return RTC_OK;
-}
-
-unsigned int __agbabi_rtc_time(void) {
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x5;
-
-    *ADDR_GPIO_PORT_DIR = 0x7;
-    gpio_write(CMD_TIME_READ, 8);
-
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    unsigned int time = gpio_read(23);
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-
-    return time;
-}
-
-void __agbabi_rtc_settime(unsigned int time) {
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x5;
-
-    *ADDR_GPIO_PORT_DIR = 0x7;
-    gpio_write(CMD_TIME_WRITE, 8);
-
-    gpio_write(time, 23);
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-}
-
-__agbabi_datetime_t __agbabi_rtc_datetime(void) {
-    __agbabi_datetime_t datetime;
-
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x5;
-
-    *ADDR_GPIO_PORT_DIR = 0x7;
-    gpio_write(CMD_DATETIME_READ, 8);
-
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    datetime[0] = gpio_read(32);
-    datetime[1] = gpio_read(23);
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-
-    return datetime;
-}
-
-void __agbabi_rtc_setdatetime(__agbabi_datetime_t datetime) {
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x5;
-
-    *ADDR_GPIO_PORT_DIR = 0x7;
-    gpio_write(CMD_DATETIME_WRITE, 8);
-
-    gpio_write(datetime[0], 32);
-    gpio_write(datetime[1], 23);
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-}
-
-unsigned int gpio_read(int n) {
-    unsigned int result = 0;
-
-    for (int i = 0; i < n; ++i) {
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
+    for (unsigned int ii = 0; ii < len; ++ii) {
+        unsigned int input;
         __asm__ volatile (
-            "lsrs    %[res], %[res], #1"            "\n\t"
-            "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
-            "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
-            "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
-            "strh    %[b100], [%[GPIO_PORT_DATA]]"  "\n\t"
-            "strh    %[b101], [%[GPIO_PORT_DATA]]"  "\n\t"
-            "ldrh    r7, [%[GPIO_PORT_DATA]]"       "\n\t"
-            "lsls    r7, #30"                       "\n\t"
-            "orrs    %[res], %[res], r7"
-            :   [res]"+l"(result)
-            :   [GPIO_PORT_DATA]"l"(ADDR_GPIO_PORT_DATA),
-                [b100]"l"(0x4),
-                [b101]"l"(0x5)
-            :   "r7"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[clock], [%[gpio]]"   "\n\t"
+            "ldrh    %[data], [%[gpio]]"
+            :   [data]"=l"(input)
+            :   [gpio]"l"(MMIO_GPIO_DATA),
+                [select]"l"(RTC_CS),
+                [clock]"l"(RTC_CS | RTC_SCK)
         );
+
+        input = (input & RTC_DATA) >> 1;
+        data |= input << ii;
     }
 
-    return result >> (32 - n);
+    return data;
 }
 
-void gpio_write(unsigned int x, int n) {
-    for (int i = 0; i < n; ++i) {
-        const unsigned int bit = (0x1 & x) << 1;
+static void rtc_cmd(const unsigned int cmd) {
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_DATA | RTC_SCK;
 
-        x >>= 1;
-
+    int ii = 8;
+    while (ii--) {
+        unsigned int output = cmd >> ii & 1;
         __asm__ volatile (
-            "strh    %[b1x0], [%[GPIO_PORT_DATA]]"  "\n\t"
-            "strh    %[b1x0], [%[GPIO_PORT_DATA]]"  "\n\t"
-            "strh    %[b1x0], [%[GPIO_PORT_DATA]]"  "\n\t"
-            "strh    %[b1x1], [%[GPIO_PORT_DATA]]"
-            ::  [GPIO_PORT_DATA]"l"(ADDR_GPIO_PORT_DATA),
-                [b1x0]"l"(bit | 0x4),
-                [b1x1]"l"(bit | 0x5)
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[clock], [%[gpio]]"
+            ::  [gpio]"l"(MMIO_GPIO_DATA),
+                [select]"l"(RTC_CS | output << 1),
+                [clock]"l"(RTC_CS | output << 1 | RTC_SCK)
         );
     }
 }
 
-unsigned int rtc_status(void) {
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x5;
+static void rtc_cmd_arg(const unsigned int cmd, unsigned int data, unsigned int len) {
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_DATA | RTC_SCK;
 
-    *ADDR_GPIO_PORT_DIR = 0x7;
-    gpio_write(CMD_STATUS_READ, 8);
+    unsigned ii = 8;
+    while (ii--) {
+        unsigned int output = cmd >> ii & 1;
+        __asm__ volatile (
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[clock], [%[gpio]]"
+            ::  [gpio]"l"(MMIO_GPIO_DATA),
+                [select]"l"(RTC_CS | output << 1),
+                [clock]"l"(RTC_CS | output << 1 | RTC_SCK)
+        );
+    }
 
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    unsigned int status = gpio_read(8);
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x1;
+    assume(len > 0 && len <= 32);
+    for (ii = 0; ii < len; ++ii) {
+        unsigned int output = data >> ii & 1;
+        __asm__ volatile (
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[clock], [%[gpio]]"
+            ::  [gpio]"l"(MMIO_GPIO_DATA),
+                [select]"l"(RTC_CS | output << 1),
+                [clock]"l"(RTC_CS | output << 1 | RTC_SCK)
+        );
+    }
+}
+
+static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime) {
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_DATA | RTC_SCK;
+
+    unsigned ii = 8;
+    while (ii--) {
+        unsigned int output = cmd >> ii & 1;
+        __asm__ volatile (
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[clock], [%[gpio]]"
+            ::  [gpio]"l"(MMIO_GPIO_DATA),
+                [select]"l"(RTC_CS | output << 1),
+                [clock]"l"(RTC_CS | output << 1 | RTC_SCK)
+        );
+    }
+
+    for (ii = 0; ii < 55; ++ii) {
+        unsigned int output = (datetime >> ii)[0] & 1;
+        __asm__ volatile (
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[select], [%[gpio]]"  "\n\t"
+            "strh    %[clock], [%[gpio]]"
+            ::  [gpio]"l"(MMIO_GPIO_DATA),
+                [select]"l"(RTC_CS | output << 1),
+                [clock]"l"(RTC_CS | output << 1 | RTC_SCK)
+        );
+    }
+}
+
+static void rtc_reset(void) {
+    static const unsigned int cmd_reset = MAKE_READ_CMD(0x0);
+
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
+
+    rtc_cmd(cmd_reset);
+
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+}
+
+static unsigned int rtc_get_status(void) {
+    static const unsigned int cmd_status = MAKE_READ_CMD(0x1);
+
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
+
+    rtc_cmd(cmd_status);
+    const unsigned int status = rtc_read(8);
+
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
 
     return status;
 }
 
-void rtc_reset(void) {
-    *ADDR_GPIO_PORT_DIR = 0x5;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x5;
+static void rtc_set_status_24hr(void) {
+    static const unsigned int cmd_status = MAKE_WRITE_CMD(0x1);
 
-    *ADDR_GPIO_PORT_DIR = 0x7;
-    gpio_write(CMD_RESET, 8);
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
 
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x5;
+    rtc_cmd_arg(cmd_status, STAT_24HOUR, 8);
 
-    *ADDR_GPIO_PORT_DIR = 0x7;
-    gpio_write(CMD_STATUS_WRITE, 8);
-    gpio_write(0x40, 8);
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+}
 
-    *ADDR_GPIO_PORT_DATA = 0x1;
-    *ADDR_GPIO_PORT_DATA = 0x1;
+int __agbabi_rtc_init(void) {
+    *MMIO_GPIO_ENABLE = 1;
+
+    unsigned int status = rtc_get_status();
+
+    if (unlikely((status & STAT_POWER) == STAT_POWER || (status & STAT_24HOUR) == 0)) {
+        rtc_reset();
+        rtc_set_status_24hr();
+    }
+
+    const unsigned int time = __agbabi_rtc_time();
+
+    if (time & TM_TEST) {
+        rtc_reset(); /* Reset to leave test mode */
+        rtc_set_status_24hr();
+    }
+
+    status = rtc_get_status();
+
+    if (unlikely((status & STAT_POWER) == STAT_POWER)) {
+        return INIT_EPOWER;
+    }
+
+    if (unlikely((status & STAT_24HOUR) == 0)) {
+        return INIT_E12HOUR;
+    }
+
+    return INIT_OK;
+}
+
+unsigned int __agbabi_rtc_time(void) {
+    static const unsigned int cmd_time = MAKE_READ_CMD(0x3);
+
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
+
+    rtc_cmd(cmd_time);
+    const unsigned int time = rtc_read(23);
+
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+
+    return time;
+}
+
+void __agbabi_rtc_settime(const unsigned int time) {
+    static const unsigned int cmd_time = MAKE_WRITE_CMD(0x3);
+
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
+
+    rtc_cmd_arg(cmd_time, time, 23);
+
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+}
+
+__agbabi_datetime_t __agbabi_rtc_datetime(void) {
+    static const unsigned int cmd_datetime = MAKE_READ_CMD(0x2);
+
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
+
+    rtc_cmd(cmd_datetime);
+    const __agbabi_datetime_t datetime = {
+        rtc_read(32),
+        rtc_read(23)
+    };
+
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+
+    return datetime;
+}
+
+void __agbabi_rtc_setdatetime(const __agbabi_datetime_t datetime) {
+    static const unsigned int cmd_datetime = MAKE_WRITE_CMD(0x2);
+
+    *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
+
+    rtc_cmd_arg_datetime(cmd_datetime, datetime);
+
+    *MMIO_GPIO_DATA = RTC_SCK;
+    *MMIO_GPIO_DATA = RTC_SCK;
 }
 
 int _gettimeofday(struct timeval* __restrict__ tv, __attribute__((unused)) void* __restrict__ tz) {
-    __agbabi_datetime_t datetime;
-
-    const u16 ime = *ADDR_IME;
-
-    *ADDR_IME = 0;
-    datetime = __agbabi_rtc_datetime();
-    *ADDR_IME = ime;
+    const short ime = *MMIO_IME;
+    *MMIO_IME = 0;
+    __agbabi_datetime_t datetime = __agbabi_rtc_datetime();
+    *MMIO_IME = ime;
 
     struct tm time;
     time.tm_year = bcd_decode(datetime[0] & 0xff) + (2000 - 1900);
-    time.tm_mon = bcd_decode((datetime[0] >> 8) & 0xff) - 1;
-    time.tm_mday = bcd_decode((datetime[0] >> 16) & 0xff);
-    time.tm_wday = bcd_decode((datetime[0] >> 24) & 0xff);
+    time.tm_mon = bcd_decode(datetime[0] >> 8 & 0xff) - 1;
+    time.tm_mday = bcd_decode(datetime[0] >> 16 & 0xff);
+    time.tm_wday = bcd_decode(datetime[0] >> 24 & 0xff);
 
     time.tm_hour = bcd_decode(datetime[1] & 0xff);
-    time.tm_min = bcd_decode((datetime[1] >> 8) & 0xff);
-    time.tm_sec = bcd_decode((datetime[1] >> 16) & 0xff);
+    time.tm_min = bcd_decode(datetime[1] >> 8 & 0xff);
+    time.tm_sec = bcd_decode(datetime[1] >> 16 & 0xff);
 
     time.tm_yday = 0;
     time.tm_isdst = 0;
@@ -263,25 +331,25 @@ int _gettimeofday(struct timeval* __restrict__ tv, __attribute__((unused)) void*
 int settimeofday(const struct timeval* tv, __attribute__((unused)) const struct timezone* tz) {
     const struct tm* tmptr = gmtime(&tv->tv_sec);
 
-    const __agbabi_datetime_t datetime = {
+    const short ime = *MMIO_IME;
+    *MMIO_IME = 0;
+    __agbabi_rtc_setdatetime((__agbabi_datetime_t) {
         bcd_encode(tmptr->tm_year - (2000 - 1900)) | ((bcd_encode(tmptr->tm_mon) + 1) << 8) | (bcd_encode(tmptr->tm_mday) << 16) | (bcd_encode(tmptr->tm_wday) << 24),
         bcd_encode(tmptr->tm_hour) | (bcd_encode(tmptr->tm_min) << 8) | (bcd_encode(tmptr->tm_sec) << 16)
-    };
-
-    const u16 ime = *ADDR_IME;
-    *ADDR_IME = 0;
-    __agbabi_rtc_setdatetime(datetime);
-    *ADDR_IME = ime;
+    });
+    *MMIO_IME = ime;
 
     return 0;
 }
 
-int bcd_decode(unsigned int x) {
-    return (int) ((x & 0xf) + ((x >> 4) * 10));
+int bcd_decode(const unsigned int x) {
+    assume(x <= 0x99);
+    return (int) (x & 0xf) + (int) (x >> 4) * 10;
 }
 
-unsigned int bcd_encode(int x) {
-    return ((unsigned int) x % 10u) | (((unsigned int) x / 10u) << 4u);
+unsigned int bcd_encode(const int x) {
+    assume(x >= 0 && x <= 0x99);
+    return (unsigned int) x % 10u | (unsigned int) x / 10u << 4;
 }
 
 #if defined(__DYNAMIC_REENT__)
