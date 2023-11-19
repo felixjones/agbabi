@@ -54,6 +54,10 @@
 #define TIME_MASK (0x007F7F9F)
 #define DATE_MASK (0x073F1FFF)
 
+// Amount of iterations to wait after writing the data,
+// before touching other RTC-related registers. Dependant on optimization level
+#define TIMEOUT_WAIT_AFTER_WRITE 448
+
 /* Compiler hacks */
 #define assume(cond) do { if (!(cond)) __builtin_unreachable(); } while (0)
 #define unlikely(cond) __builtin_expect(!!(cond), 0)
@@ -138,6 +142,8 @@ static void rtc_cmd_arg(const unsigned int cmd, unsigned int data, unsigned int 
 
     assume(len > 0 && len <= 32);
     rtc_write(data, len);
+
+    for(volatile int a = 0; a < TIMEOUT_WAIT_AFTER_WRITE; a++);
 }
 
 static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime, int is_12hr) {
@@ -148,6 +154,8 @@ static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime,
 
     rtc_write(date, 32);
     rtc_write(time, 24);
+
+    for(volatile int a = 0; a < TIMEOUT_WAIT_AFTER_WRITE; a++);
 }
 
 static void rtc_reset(void) {
