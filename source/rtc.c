@@ -50,8 +50,8 @@
 
 // Mask out data not needed from date and time
 #define PM_TIME_FLAG ((unsigned int)0x00000080)
-#define HOURS_MASK ((unsigned int)0x0000009F)
-#define TIME_MASK (0x007F7F9F)
+#define HOURS_MASK ((unsigned int)0x000000BF)
+#define TIME_MASK (0x007F7FBF)
 #define DATE_MASK (0x073F1FFF)
 
 // Amount of iterations to wait after writing the data,
@@ -220,8 +220,12 @@ static int rtc_get_is_12hr(void) {
 static unsigned int get_time_pm_fix(unsigned int time) {
     unsigned hour = time & HOURS_MASK;
     time &= (~HOURS_MASK);
-    if((hour & PM_TIME_FLAG) && (hour & (~PM_TIME_FLAG)) <= 11)
-        hour += 12;
+    if((hour & PM_TIME_FLAG) && (hour & (~PM_TIME_FLAG)) <= 0x11) {
+        hour += 0x12;
+        // BCD Math
+        if((hour & 0xF) >= 0xA)
+            hour += 0x10 - 0xA;
+    }
 
     return (time | hour) & (~PM_TIME_FLAG);
 }
@@ -230,8 +234,11 @@ static unsigned int set_time_pm_fix(unsigned int time, int is_12hr) {
     time &= (~PM_TIME_FLAG);
     unsigned hour = time & HOURS_MASK;
     time &= (~HOURS_MASK);
-    if((hour >= 12) && is_12hr) {
-        hour -= 12;
+    if((hour >= 0x12) && is_12hr) {
+        hour -= 0x12;
+        // BCD Math
+        if((hour & 0xF) >= 0xE)
+            hour -= (0xE - 0x8);
         hour |= PM_TIME_FLAG;
     }
 
