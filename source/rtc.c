@@ -41,7 +41,7 @@
 #define STAT_POWER  (0x80)
 
 /* Time flags */
-#define TM_TEST (0x80)
+#define TM_TEST (0x00800000)
 
 /* Init results */
 #define INIT_OK      (0x00)
@@ -51,7 +51,7 @@
 // Mask out data not needed from date and time
 #define PM_TIME_FLAG ((unsigned int)0x00000080)
 #define HOURS_MASK ((unsigned int)0x000000BF)
-#define TIME_MASK (0x007F7FBF)
+#define TIME_MASK (0x00FF7FBF)
 #define DATE_MASK (0x073F1FFF)
 
 // Amount of iterations to wait after writing the data,
