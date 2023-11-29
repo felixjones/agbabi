@@ -46,7 +46,7 @@
 /* Init results */
 #define INIT_OK      (0x00)
 #define INIT_EPOWER  (0x01)
-#define INIT_E12HOUR (0x02)
+#define INIT_ENORTC  (0x02)
 
 // Mask out data not needed from date and time
 #define PM_TIME_FLAG ((unsigned int)0x00000080)
@@ -255,9 +255,12 @@ int __agbabi_rtc_init(void) {
         rtc_set_status_24hr();
     }
 
-    const unsigned int time = __agbabi_rtc_time();
+    const __agbabi_datetime_t datetime = __agbabi_rtc_datetime();
+    
+    if(unlikely(datetime[0] == 0))
+        return INIT_ENORTC;
 
-    if (time & TM_TEST) {
+    if (datetime[1] & TM_TEST) {
         rtc_reset(); /* Reset to leave test mode */
         rtc_set_status_24hr();
     }
