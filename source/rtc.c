@@ -56,7 +56,7 @@
 
 // Amount of iterations to wait after writing the data,
 // before touching other RTC-related registers. Dependant on optimization level
-#define TIMEOUT_CYCLES_WAIT_AFTER_WRITE_PER_BYTE 1858
+#define TIMEOUT_CYCLES_WAIT_AFTER_WRITE_PER_BYTE 5574
 
 /* Compiler hacks */
 #define assume(cond) do { if (!(cond)) __builtin_unreachable(); } while (0)
