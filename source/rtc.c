@@ -146,7 +146,7 @@ static void rtc_cmd_arg(const unsigned int cmd, unsigned int data, unsigned int 
     int wait = (TIMEOUT_CYCLES_WAIT_AFTER_WRITE_PER_BYTE * 7 + 11 + 6) / 12;
     __asm__ volatile (
         "L1%=:"                         "\n\t"
-#if __ARM_ASM_SYNTAX_UNIFIED__  == 1
+#if defined(__ARM_ASM_SYNTAX_UNIFIED__) && __ARM_ASM_SYNTAX_UNIFIED__ == 1
         "subs  %[wait], %[wait], #1"    "\n\t"
 #else
         "sub   %[wait], #1"             "\n\t"
@@ -168,7 +168,7 @@ static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime,
     int wait = (TIMEOUT_CYCLES_WAIT_AFTER_WRITE_PER_BYTE * 7 + 11 + 6) / 12;
     __asm__ volatile (
         "L1%=:"                         "\n\t"
-#if __ARM_ASM_SYNTAX_UNIFIED__  == 1
+#if defined(__ARM_ASM_SYNTAX_UNIFIED__) && __ARM_ASM_SYNTAX_UNIFIED__ == 1
         "subs  %[wait], %[wait], #1"    "\n\t"
 #else
         "sub   %[wait], #1"             "\n\t"
