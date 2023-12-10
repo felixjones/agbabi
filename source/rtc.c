@@ -20,9 +20,9 @@
 
 /* MMIO registers */
 #define MMIO_IME               ((volatile short*) 0x4000208)
-#define MMIO_GPIO_DATA         ((volatile short*) 0x80000c4)
-#define MMIO_GPIO_WRITE_ENABLE ((volatile short*) 0x80000c6)
-#define MMIO_GPIO_ENABLE       ((volatile short*) 0x80000c8)
+#define MMIO_GPIO_DATA         ((volatile short*) 0x80000C4)
+#define MMIO_GPIO_WRITE_ENABLE ((volatile short*) 0x80000C6)
+#define MMIO_GPIO_ENABLE       ((volatile short*) 0x80000C8)
 
 /* RTC pins */
 #define RTC_CS   (0x4)
@@ -49,10 +49,10 @@
 #define INIT_ENORTC  (0x02)
 
 // Mask out data not needed from date and time
-#define PM_TIME_FLAG ((unsigned int)0x00000080)
-#define HOURS_MASK ((unsigned int)0x000000BF)
-#define TIME_MASK (0x00FF7FBF)
-#define DATE_MASK (0x073F1FFF)
+#define PM_TIME_FLAG    (0x00000080u)
+#define HOURS_MASK      (0x000000BFu)
+#define TIME_MASK   (0x00FF7FBF)
+#define DATE_MASK   (0x073F1FFF)
 
 // Amount of iterations to wait after writing the data,
 // before touching other RTC-related registers. Dependant on optimization level
@@ -66,13 +66,13 @@ static unsigned int rtc_read(unsigned int len);
 static void rtc_write(unsigned int data, unsigned int len);
 static void rtc_cmd(unsigned int cmd);
 static void rtc_cmd_arg(unsigned int cmd, unsigned int data, unsigned int len);
-static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime, int is_12hr);
+static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime, int is12hr);
 static void rtc_reset(void);
 static unsigned int rtc_get_status(void);
 static void rtc_set_status_24hr(void);
-static int rtc_get_is_12hr(void);
-static unsigned int get_time_pm_fix(unsigned int time);
-static unsigned int set_time_pm_fix(unsigned int time, int is_12hr);
+static int rtc_is_12hr(void);
+static unsigned int rtc_get_time_pm_fix(unsigned int time);
+static unsigned int rtc_set_time_pm_fix(unsigned int time, int is12hr);
 
 static int bcd_decode(unsigned int x) __attribute__((const));
 static unsigned int bcd_encode(int x) __attribute__((const));
@@ -146,15 +146,15 @@ static void rtc_cmd_arg(const unsigned int cmd, unsigned int data, unsigned int 
     __asm__ volatile (
         "L1%=: subs %[wait], #1"  "\n\t"
         "bne L1%="
-        ::  [wait]"l"(((((TIMEOUT_CYCLES_WAIT_AFTER_WRITE_PER_BYTE * len) + 7) / 8) + 11 + 6) / 12)
+        ::  [wait]"l"(((TIMEOUT_CYCLES_WAIT_AFTER_WRITE_PER_BYTE * len + 7) / 8 + 11 + 6) / 12)
     );
 }
 
-static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime, int is_12hr) {
+static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime, int is12hr) {
     rtc_cmd(cmd);
 
     unsigned int date = datetime[0];
-    unsigned int time = set_time_pm_fix(datetime[1], is_12hr);
+    unsigned int time = rtc_set_time_pm_fix(datetime[1], is12hr);
 
     rtc_write(date, 32);
     rtc_write(time, 24);
@@ -162,7 +162,7 @@ static void rtc_cmd_arg_datetime(unsigned int cmd, __agbabi_datetime_t datetime,
     __asm__ volatile (
         "L1%=: subs %[wait], #1"  "\n\t"
         "bne L1%="
-        ::  [wait]"l"(((TIMEOUT_CYCLES_WAIT_AFTER_WRITE_PER_BYTE * 7) + 11 + 6) / 12)
+        ::  [wait]"l"((TIMEOUT_CYCLES_WAIT_AFTER_WRITE_PER_BYTE * 7 + 11 + 6) / 12)
     );
 }
 
@@ -208,37 +208,36 @@ static void rtc_set_status_24hr(void) {
     *MMIO_GPIO_DATA = RTC_SCK;
 }
 
-static int rtc_get_is_12hr(void) {
-    int is_12hr = 0;
-    unsigned int status = rtc_get_status();
-    if((status & STAT_24HOUR) == 0)
-        is_12hr = 1;
-
-    return is_12hr;
+static int rtc_is_12hr(void) {
+    return (rtc_get_status() & STAT_24HOUR) == 0;
 }
 
-static unsigned int get_time_pm_fix(unsigned int time) {
-    unsigned hour = time & HOURS_MASK;
-    time &= (~HOURS_MASK);
-    if((hour & PM_TIME_FLAG) && (hour & (~PM_TIME_FLAG)) <= 0x11) {
+static unsigned int rtc_get_time_pm_fix(unsigned int time) {
+    unsigned int hour = time & HOURS_MASK;
+    time &= ~HOURS_MASK;
+
+    if (hour & PM_TIME_FLAG && (hour & ~PM_TIME_FLAG) <= 0x11) {
         hour += 0x12;
         // BCD Math
-        if((hour & 0xF) >= 0xA)
+        if ((hour & 0xF) >= 0xA) {
             hour += 0x10 - 0xA;
+        }
     }
 
-    return (time | hour) & (~PM_TIME_FLAG);
+    return (time | hour) & ~PM_TIME_FLAG;
 }
 
-static unsigned int set_time_pm_fix(unsigned int time, int is_12hr) {
-    time &= (~PM_TIME_FLAG);
-    unsigned hour = time & HOURS_MASK;
-    time &= (~HOURS_MASK);
-    if((hour >= 0x12) && is_12hr) {
+static unsigned int rtc_set_time_pm_fix(unsigned int time, const int is12hr) {
+    time &= ~PM_TIME_FLAG;
+    unsigned int hour = time & HOURS_MASK;
+    time &= ~HOURS_MASK;
+
+    if (hour >= 0x12 && is12hr) {
         hour -= 0x12;
         // BCD Math
-        if((hour & 0xF) >= 0xE)
-            hour -= (0xE - 0x8);
+        if ((hour & 0xF) >= 0xE) {
+            hour -= 0xE - 0x8;
+        }
         hour |= PM_TIME_FLAG;
     }
 
@@ -257,8 +256,9 @@ int __agbabi_rtc_init(void) {
 
     const __agbabi_datetime_t datetime = __agbabi_rtc_datetime();
     
-    if(unlikely(datetime[0] == 0))
+    if (unlikely(datetime[0] == 0)) {
         return INIT_ENORTC;
+    }
 
     if (datetime[1] & TM_TEST) {
         rtc_reset(); /* Reset to leave test mode */
@@ -282,7 +282,7 @@ unsigned int __agbabi_rtc_time(void) {
     *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
 
     rtc_cmd(cmd_time);
-    const unsigned int time = get_time_pm_fix(rtc_read(24) & TIME_MASK);
+    const unsigned int time = rtc_get_time_pm_fix(rtc_read(24) & TIME_MASK);
 
     *MMIO_GPIO_DATA = RTC_SCK;
     *MMIO_GPIO_DATA = RTC_SCK;
@@ -291,15 +291,15 @@ unsigned int __agbabi_rtc_time(void) {
 }
 
 void __agbabi_rtc_settime(const unsigned int time) {
-    int is_12hr = rtc_get_is_12hr();
-
     static const unsigned int cmd_time = MAKE_WRITE_CMD(0x3);
+
+    const int is12hr = rtc_is_12hr();
 
     *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
     *MMIO_GPIO_DATA = RTC_SCK;
     *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
 
-    rtc_cmd_arg(cmd_time, set_time_pm_fix(time, is_12hr), 24);
+    rtc_cmd_arg(cmd_time, rtc_set_time_pm_fix(time, is12hr), 24);
 
     *MMIO_GPIO_DATA = RTC_SCK;
     *MMIO_GPIO_DATA = RTC_SCK;
@@ -315,7 +315,7 @@ __agbabi_datetime_t __agbabi_rtc_datetime(void) {
     rtc_cmd(cmd_datetime);
     const __agbabi_datetime_t datetime = {
         rtc_read(32) & DATE_MASK,
-        get_time_pm_fix(rtc_read(24) & TIME_MASK)
+        rtc_get_time_pm_fix(rtc_read(24) & TIME_MASK)
     };
 
     *MMIO_GPIO_DATA = RTC_SCK;
@@ -325,15 +325,15 @@ __agbabi_datetime_t __agbabi_rtc_datetime(void) {
 }
 
 void __agbabi_rtc_setdatetime(const __agbabi_datetime_t datetime) {
-    int is_12hr = rtc_get_is_12hr();
-
     static const unsigned int cmd_datetime = MAKE_WRITE_CMD(0x2);
+
+    const int is12hr = rtc_is_12hr();
 
     *MMIO_GPIO_WRITE_ENABLE = RTC_CS | RTC_SCK;
     *MMIO_GPIO_DATA = RTC_SCK;
     *MMIO_GPIO_DATA = RTC_CS | RTC_SCK;
 
-    rtc_cmd_arg_datetime(cmd_datetime, datetime, is_12hr);
+    rtc_cmd_arg_datetime(cmd_datetime, datetime, is12hr);
 
     *MMIO_GPIO_DATA = RTC_SCK;
     *MMIO_GPIO_DATA = RTC_SCK;
