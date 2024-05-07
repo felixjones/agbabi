@@ -15,7 +15,10 @@
 */
 
 #include <agbabi.h>
-#include <reent.h>
+// sys/types.h pulls in sys/config.h on newlib, which defines __DYNAMIC_REENT__.
+// This approach preserves compatibility with other future POSIX-compliant libc
+// implementations.
+#include <sys/types.h>
 #include <sys/time.h>
 
 #define RTC_OK      (0x00)
